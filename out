@@ -1,0 +1,31 @@
+Generating mega topology...
+Serializing to JSON...
+MegaTopology JSON size: 292995 bytes
+Serialization took: 2.89697 ms
+JSON snippet: {"datacenters":{"Region-0":{"name":"Region-0","servers":[{"hostname":"server-0-0","ports":[{"port":80,"protocol":"TCP","status":"open"},{"port":81,"protocol":"TCP","status":"open"},{"port":82,"protoco...
+
+Serializing to YAML...
+YAML serialization took: 137.16 ms
+YAML snippet:
+  datacenters:   # map<string,10DataCenter>
+    Region-0: 
+      name: Region-0
+      servers:   # seq<6Server>
+          hostname: 
+          - server-0-0
+          ports:   # seq<10PortConfig>
+              port: 
+              - 80
+              protocol: 
+              - TCP
+              status: 
+              - open
+              port: 
+              - 81
+              protocol: 
+              - TCP
+              status: 
+              - open
+              port: 
+              - 82
+       ...

@@ -1,0 +1,68 @@
+g++ -std=c++20 example_names.cpp -o bin/example_names -L/usr/local/lib -lyaml-cpp
+example_names.cpp: In instantiation of ‘static constexpr auto meta::field_info<T, I>::name() [with T = Task; long unsigned int I = 0]’:
+example_names.cpp:372:69:   required from here
+example_names.cpp:115:54: error: no matching function for call to ‘get_field_name<f0>()’
+  115 |       if constexpr (I == 0) return get_field_name<f0>();
+      |                                    ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp:88:28: note: candidate: ‘template<auto& Field> consteval std::string_view meta::get_field_name()’
+   88 | consteval std::string_view get_field_name() {
+      |                            ^~~~~~~~~~~~~~
+example_names.cpp:88:28: note:   template argument deduction/substitution failed:
+example_names.cpp:115:54: error: the address of ‘f0’ is not a valid template argument because it does not have static storage duration
+  115 |       if constexpr (I == 0) return get_field_name<f0>();
+      |                                    ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp: In instantiation of ‘static constexpr auto meta::field_info<T, I>::name() [with T = Task; long unsigned int I = 1]’:
+example_names.cpp:373:69:   required from here
+example_names.cpp:116:59: error: no matching function for call to ‘get_field_name<f1>()’
+  116 |       else if constexpr (I == 1) return get_field_name<f1>();
+      |                                         ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp:88:28: note: candidate: ‘template<auto& Field> consteval std::string_view meta::get_field_name()’
+   88 | consteval std::string_view get_field_name() {
+      |                            ^~~~~~~~~~~~~~
+example_names.cpp:88:28: note:   template argument deduction/substitution failed:
+example_names.cpp:116:59: error: the address of ‘f1’ is not a valid template argument because it does not have static storage duration
+  116 |       else if constexpr (I == 1) return get_field_name<f1>();
+      |                                         ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp: In instantiation of ‘static constexpr auto meta::field_info<T, I>::name() [with T = Task; long unsigned int I = 2]’:
+example_names.cpp:374:69:   required from here
+example_names.cpp:117:59: error: no matching function for call to ‘get_field_name<f2>()’
+  117 |       else if constexpr (I == 2) return get_field_name<f2>();
+      |                                         ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp:88:28: note: candidate: ‘template<auto& Field> consteval std::string_view meta::get_field_name()’
+   88 | consteval std::string_view get_field_name() {
+      |                            ^~~~~~~~~~~~~~
+example_names.cpp:88:28: note:   template argument deduction/substitution failed:
+example_names.cpp:117:59: error: the address of ‘f2’ is not a valid template argument because it does not have static storage duration
+  117 |       else if constexpr (I == 2) return get_field_name<f2>();
+      |                                         ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp: In instantiation of ‘static constexpr auto meta::field_info<T, I>::name() [with T = Project; long unsigned int I = 0]’:
+example_names.cpp:305:34:   required from ‘void meta::serialize_fields(const T&, std::ostringstream&, int, std::index_sequence<Is ...>) [with T = Project; long unsigned int ...Is = {0, 1}; std::ostringstream = std::__cxx11::basic_ostringstream<char>; std::index_sequence<Is ...> = std::integer_sequence<long unsigned int, 0, 1>]’
+example_names.cpp:322:21:   required from ‘std::string meta::serialize(const T&, int) [with T = Project; std::string = std::__cxx11::basic_string<char>]’
+example_names.cpp:335:19:   required from ‘std::string meta::to_string(const T&) [with T = Project; std::string = std::__cxx11::basic_string<char>]’
+example_names.cpp:390:31:   required from here
+example_names.cpp:109:54: error: no matching function for call to ‘get_field_name<f0>()’
+  109 |       if constexpr (I == 0) return get_field_name<f0>();
+      |                                    ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp:88:28: note: candidate: ‘template<auto& Field> consteval std::string_view meta::get_field_name()’
+   88 | consteval std::string_view get_field_name() {
+      |                            ^~~~~~~~~~~~~~
+example_names.cpp:88:28: note:   template argument deduction/substitution failed:
+example_names.cpp:109:54: error: the address of ‘f0’ is not a valid template argument because it does not have static storage duration
+  109 |       if constexpr (I == 0) return get_field_name<f0>();
+      |                                    ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp: In instantiation of ‘static constexpr auto meta::field_info<T, I>::name() [with T = Project; long unsigned int I = 1]’:
+example_names.cpp:305:34:   required from ‘void meta::serialize_fields(const T&, std::ostringstream&, int, std::index_sequence<Is ...>) [with T = Project; long unsigned int ...Is = {0, 1}; std::ostringstream = std::__cxx11::basic_ostringstream<char>; std::index_sequence<Is ...> = std::integer_sequence<long unsigned int, 0, 1>]’
+example_names.cpp:322:21:   required from ‘std::string meta::serialize(const T&, int) [with T = Project; std::string = std::__cxx11::basic_string<char>]’
+example_names.cpp:335:19:   required from ‘std::string meta::to_string(const T&) [with T = Project; std::string = std::__cxx11::basic_string<char>]’
+example_names.cpp:390:31:   required from here
+example_names.cpp:110:59: error: no matching function for call to ‘get_field_name<f1>()’
+  110 |       else if constexpr (I == 1) return get_field_name<f1>();
+      |                                         ~~~~~~~~~~~~~~~~~~^~
+example_names.cpp:88:28: note: candidate: ‘template<auto& Field> consteval std::string_view meta::get_field_name()’
+   88 | consteval std::string_view get_field_name() {
+      |                            ^~~~~~~~~~~~~~
+example_names.cpp:88:28: note:   template argument deduction/substitution failed:
+example_names.cpp:110:59: error: the address of ‘f1’ is not a valid template argument because it does not have static storage duration
+  110 |       else if constexpr (I == 1) return get_field_name<f1>();
+      |                                         ~~~~~~~~~~~~~~~~~~^~
+make: *** [Makefile:21: bin/example_names] Error 1
