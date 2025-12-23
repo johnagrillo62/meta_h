@@ -74,11 +74,11 @@ void test_enum_serialization() {
     std::cout << "=== Test 1: Enum Serialization ===" << std::endl;
     
     LogLevel level = LogLevel::Warning;
-    auto node = meta::dispatchSer(level);
+    auto node = meta::to(level);
     std::cout << "Serialized LogLevel::Warning: " << node << std::endl;
     
     LogLevel level2 = LogLevel::Error;
-    auto node2 = meta::dispatchSer(level2);
+    auto node2 = meta::to(level2);
     std::cout << "Serialized LogLevel::Error: " << node2 << std::endl;
     
     assert(node.as<std::string>() == "warning");
@@ -92,14 +92,14 @@ void test_enum_deserialization() {
     
     YAML::Node warningNode = YAML::Node("warning");
     LogLevel level;
-    auto result = meta::dispatchDeser(level, meta::Node(warningNode));
+    auto result = meta::from(level, meta::Node(warningNode));
     assert(result.valid);
     assert(level == LogLevel::Warning);
     std::cout << "✓ Deserialized 'warning' to LogLevel::Warning" << std::endl;
     
     YAML::Node debugNode = YAML::Node("debug");
     LogLevel level2;
-    auto result2 = meta::dispatchDeser(level2, meta::Node(debugNode));
+    auto result2 = meta::from(level2, meta::Node(debugNode));
     assert(result2.valid);
     assert(level2 == LogLevel::Debug);
     std::cout << "✓ Deserialized 'debug' to LogLevel::Debug\n" << std::endl;
@@ -110,7 +110,7 @@ void test_invalid_enum() {
     
     YAML::Node invalidNode = YAML::Node("invalid_level");
     LogLevel level;
-    auto result = meta::dispatchDeser(level, meta::Node(invalidNode));
+    auto result = meta::from(level, meta::Node(invalidNode));
     
     if (!result.valid) {
         std::cout << "✓ Correctly rejected invalid enum value" << std::endl;
@@ -127,7 +127,7 @@ void test_struct_with_enum() {
     std::cout << "=== Test 4: Struct with Enum ===" << std::endl;
     
     LogEntry entry{"Application started", LogLevel::Info};
-    auto node = meta::dispatchSer(entry);
+    auto node = meta::to(entry);
     
     std::cout << "Serialized LogEntry:\n" << node << std::endl;
     
@@ -137,7 +137,7 @@ void test_struct_with_enum() {
     
     // Deserialize
     LogEntry deserialized;
-    auto result = meta::dispatchDeser(deserialized, meta::Node(node));
+    auto result = meta::from(deserialized, meta::Node(node));
     assert(result.valid);
     assert(deserialized.message == "Application started");
     assert(deserialized.level == LogLevel::Info);
@@ -158,7 +158,7 @@ void test_vector_of_enum_structs() {
         }
     };
     
-    auto node = meta::dispatchSer(api);
+    auto node = meta::to(api);
     std::cout << "Serialized Service:\n" << node << std::endl;
     
     // Verify
@@ -171,7 +171,7 @@ void test_vector_of_enum_structs() {
     
     // Deserialize
     Service deserialized;
-    auto result = meta::dispatchDeser(deserialized, meta::Node(node));
+    auto result = meta::from(deserialized, meta::Node(node));
     assert(result.valid);
     assert(deserialized.name == "API Service");
     assert(deserialized.status == Status::Active);

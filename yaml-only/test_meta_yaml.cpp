@@ -58,7 +58,7 @@ void test_primitive_int() {
     std::cout << "Serialized: " << node << std::endl;
     
     int result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result == 42);
     
@@ -73,7 +73,7 @@ void test_primitive_string() {
     std::cout << "Serialized: " << node << std::endl;
     
     std::string result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result == "Hello World");
     
@@ -88,7 +88,7 @@ void test_primitive_bool() {
     std::cout << "Serialized: " << node << std::endl;
     
     bool result = false;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result == true);
     
@@ -103,7 +103,7 @@ void test_primitive_double() {
     std::cout << "Serialized: " << node << std::endl;
     
     double result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result > 3.1 && result < 3.2);
     
@@ -118,7 +118,7 @@ void test_vector() {
     std::cout << "Serialized: " << node << std::endl;
     
     std::vector<int> result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result.size() == 5);
     assert(result[0] == 1);
@@ -135,7 +135,7 @@ void test_map() {
     std::cout << "Serialized:\n" << node << std::endl;
     
     std::map<std::string, int> result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result.size() == 3);
     assert(result["one"] == 1);
@@ -152,7 +152,7 @@ void test_optional_has_value() {
     std::cout << "Serialized: " << node << std::endl;
     
     std::optional<int> result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result.has_value());
     assert(result.value() == 42);
@@ -168,7 +168,7 @@ void test_optional_null() {
     std::cout << "Serialized: " << node << std::endl;
     
     std::optional<int> result = 99;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(!result.has_value());
     
@@ -183,7 +183,7 @@ void test_pair() {
     std::cout << "Serialized: " << node << std::endl;
     
     std::pair<std::string, int> result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result.first == "answer");
     assert(result.second == 42);
@@ -199,7 +199,7 @@ void test_tuple() {
     std::cout << "Serialized: " << node << std::endl;
     
     std::tuple<std::string, int, bool> result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(std::get<0>(result) == "test");
     assert(std::get<1>(result) == 123);
@@ -216,7 +216,7 @@ void test_simple_struct() {
     std::cout << "Serialized:\n" << node << std::endl;
     
     Person result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result.name == "John Doe");
     assert(result.age == 30);
@@ -245,7 +245,7 @@ void test_nested_struct() {
     std::cout << "Serialized:\n" << node << std::endl;
     
     Company result;
-    auto desResult = meta::dispatchDeser(result, meta::Node(node));
+    auto desResult = meta::from(result, meta::Node(node));
     assert(desResult.valid);
     assert(result.name == "ACME Corp");
     assert(result.employees.size() == 3);

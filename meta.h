@@ -1,4 +1,4 @@
-// meta.h - Type-safe serialization using template overloading
+// meta.h - Type-safe serialization using templates
 // John A Grillo with assistance from Claude AI
 //
 // Just a fun way to experiment with reflection in C++.
@@ -72,6 +72,20 @@ template <typename EnumT, auto& MappingArray> struct EnumTraitsAuto
         for (auto [e, _] : mapping)
             f(e);
     }
+
+    static std::string validValues()
+  {
+    std::string out;
+    bool first = true;
+    for (auto [_, s] : mapping)
+      {
+        if (!first) out += ", ";
+        first = false;
+        out += s;
+      }
+    return out;
+  }
+
 };
 
 template <typename EnumT>
@@ -106,6 +120,8 @@ struct ValidationResult
         errors.push_back({std::string(fieldName), std::string(message)});
     }
 };
+
+  
 
 template <auto MemberPtr> struct Field
 {
@@ -400,7 +416,12 @@ inline ValidationResult from(EnumT& obj, Node* node)
     if (!e)
     {
         ValidationResult r;
-        r.addError("", "Unknown enum value: " + *s);
+	  r.addError(
+            "",
+            "Unknown enum value: '" + *s +
+            "'. Valid values are: " +
+            EnumMapping<EnumT>::Type::validValues()
+        );
         return r;
     }
     obj = *e;

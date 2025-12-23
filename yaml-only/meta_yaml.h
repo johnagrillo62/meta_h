@@ -161,11 +161,11 @@ struct Node {
 // DESERIALIZATION
 // ============================================================================
 
-template <typename T> inline ValidationResult dispatchDeser(T &obj, const Node &node);
+template <typename T> inline ValidationResult from(T &obj, const Node &node);
 
 // Primitives
 template <>
-inline ValidationResult dispatchDeser(int &obj, const Node &node) {
+inline ValidationResult from(int &obj, const Node &node) {
   auto v = node.asInt();
   if (!v) {
     ValidationResult r;
@@ -177,7 +177,7 @@ inline ValidationResult dispatchDeser(int &obj, const Node &node) {
 }
 
 template <>
-inline ValidationResult dispatchDeser(double &obj, const Node &node) {
+inline ValidationResult from(double &obj, const Node &node) {
   auto v = node.asDouble();
   if (!v) v = node.asInt();
   if (!v) {
@@ -190,7 +190,7 @@ inline ValidationResult dispatchDeser(double &obj, const Node &node) {
 }
 
 template <>
-inline ValidationResult dispatchDeser(std::string &obj, const Node &node) {
+inline ValidationResult from(std::string &obj, const Node &node) {
   auto v = node.asString();
   if (!v) {
     ValidationResult r;
@@ -202,7 +202,7 @@ inline ValidationResult dispatchDeser(std::string &obj, const Node &node) {
 }
 
 template <>
-inline ValidationResult dispatchDeser(bool &obj, const Node &node) {
+inline ValidationResult from(bool &obj, const Node &node) {
   auto v = node.asBool();
   if (!v) {
     ValidationResult r;
@@ -214,7 +214,7 @@ inline ValidationResult dispatchDeser(bool &obj, const Node &node) {
 }
 
 template <>
-inline ValidationResult dispatchDeser(std::filesystem::path &obj, const Node &node) {
+inline ValidationResult from(std::filesystem::path &obj, const Node &node) {
   auto str = node.asString();
   if (!str) {
     ValidationResult r;
@@ -227,7 +227,7 @@ inline ValidationResult dispatchDeser(std::filesystem::path &obj, const Node &no
 
 // Enums
 template <RegisteredEnum EnumT>
-inline ValidationResult dispatchDeser(EnumT &obj, const Node &node) {
+inline ValidationResult from(EnumT &obj, const Node &node) {
   auto s = node.asString();
   if (!s) {
     ValidationResult r;
@@ -248,7 +248,7 @@ inline ValidationResult dispatchDeser(EnumT &obj, const Node &node) {
 
 // Vector
 template <typename T>
-inline ValidationResult dispatchDeser(std::vector<T> &obj, const Node &node) {
+inline ValidationResult from(std::vector<T> &obj, const Node &node) {
   ValidationResult result;
   if (!node.isSequence()) {
     result.addError("", "Expected sequence");
@@ -257,7 +257,7 @@ inline ValidationResult dispatchDeser(std::vector<T> &obj, const Node &node) {
   obj.clear();
   for (size_t i = 0; i < node.size(); ++i) {
     T elem{};
-    auto elemResult = dispatchDeser(elem, node.at(i));
+    auto elemResult = from(elem, node.at(i));
     if (!elemResult.valid) {
       for (auto &[f, e] : elemResult.errors) {
         result.addError("[" + std::to_string(i) + "]" + (f.empty() ? "" : "." + f), e);
@@ -271,7 +271,7 @@ inline ValidationResult dispatchDeser(std::vector<T> &obj, const Node &node) {
 
 // Map
 template <typename K, typename V>
-inline ValidationResult dispatchDeser(std::map<K, V> &obj, const Node &node) {
+inline ValidationResult from(std::map<K, V> &obj, const Node &node) {
   ValidationResult result;
   if (!node.isMap()) {
     result.addError("", "Expected map");
@@ -280,7 +280,7 @@ inline ValidationResult dispatchDeser(std::map<K, V> &obj, const Node &node) {
   obj.clear();
   for (auto &k : node.keys()) {
     V v{};
-    auto vResult = dispatchDeser(v, node.at(k));
+    auto vResult = from(v, node.at(k));
     if (!vResult.valid) {
       for (auto &[f, e] : vResult.errors) {
         result.addError(k + (f.empty() ? "" : "." + f), e);
@@ -294,13 +294,13 @@ inline ValidationResult dispatchDeser(std::map<K, V> &obj, const Node &node) {
 
 // Optional
 template <typename T>
-inline ValidationResult dispatchDeser(std::optional<T> &obj, const Node &node) {
+inline ValidationResult from(std::optional<T> &obj, const Node &node) {
   if (node.isNull()) {
     obj = std::nullopt;
     return ValidationResult();
   }
   T v{};
-  auto result = dispatchDeser(v, node);
+  auto result = from(v, node);
   if (result.valid)
     obj = v;
   return result;
@@ -308,14 +308,14 @@ inline ValidationResult dispatchDeser(std::optional<T> &obj, const Node &node) {
 
 // Pair
 template <typename K, typename V>
-inline ValidationResult dispatchDeser(std::pair<K, V> &obj, const Node &node) {
+inline ValidationResult from(std::pair<K, V> &obj, const Node &node) {
   ValidationResult result;
   if (!node.isSequence() || node.size() != 2) {
     result.addError("", "Expected sequence of 2 elements");
     return result;
   }
-  auto kResult = dispatchDeser(obj.first, node.at(0));
-  auto vResult = dispatchDeser(obj.second, node.at(1));
+  auto kResult = from(obj.first, node.at(0));
+  auto vResult = from(obj.second, node.at(1));
   if (!kResult.valid) result = kResult;
   if (!vResult.valid) result = vResult;
   return result;
@@ -323,7 +323,7 @@ inline ValidationResult dispatchDeser(std::pair<K, V> &obj, const Node &node) {
 
 // Tuple
 template <typename... Args>
-inline ValidationResult dispatchDeser(std::tuple<Args...> &obj, const Node &node) {
+inline ValidationResult from(std::tuple<Args...> &obj, const Node &node) {
   ValidationResult result;
   if (!node.isSequence() || node.size() != sizeof...(Args)) {
     result.addError("", "Expected sequence");
@@ -333,7 +333,7 @@ inline ValidationResult dispatchDeser(std::tuple<Args...> &obj, const Node &node
       [&](auto &&...elems) {
         size_t i = 0;
         (..., [&](auto &elem) {
-          auto elemResult = dispatchDeser(elem, node.at(i++));
+          auto elemResult = from(elem, node.at(i++));
           if (!elemResult.valid) {
             for (auto &[f, e] : elemResult.errors) {
               result.addError("[" + std::to_string(i - 1) + "]" + (f.empty() ? "" : "." + f), e);
@@ -347,7 +347,7 @@ inline ValidationResult dispatchDeser(std::tuple<Args...> &obj, const Node &node
 
 // Struct
 template <typename T>
-inline ValidationResult dispatchDeser(T &obj, const Node &node) {
+inline ValidationResult from(T &obj, const Node &node) {
   if constexpr (requires { T::fields; }) {
     ValidationResult result;
     std::apply(
@@ -360,7 +360,7 @@ inline ValidationResult dispatchDeser(T &obj, const Node &node) {
               }
               return;
             }
-            auto fieldResult = dispatchDeser(obj.*(field.memberPtr), fieldNode);
+            auto fieldResult = from(obj.*(field.memberPtr), fieldNode);
             if (!fieldResult.valid) {
               for (auto &[f, e] : fieldResult.errors) {
                 result.addError(std::string(field.fieldName) + (f.empty() ? "" : "." + f), e);
@@ -380,85 +380,85 @@ inline ValidationResult dispatchDeser(T &obj, const Node &node) {
 // SERIALIZATION
 // ============================================================================
 
-template <typename T> inline YAML::Node dispatchSer(const T &obj);
+template <typename T> inline YAML::Node to(const T &obj);
 
 // Primitives
 template <>
-inline YAML::Node dispatchSer(const int &obj) {
+inline YAML::Node to(const int &obj) {
   return YAML::Node(obj);
 }
 
 template <>
-inline YAML::Node dispatchSer(const double &obj) {
+inline YAML::Node to(const double &obj) {
   return YAML::Node(obj);
 }
 
 template <>
-inline YAML::Node dispatchSer(const bool &obj) {
+inline YAML::Node to(const bool &obj) {
   return YAML::Node(obj);
 }
 
 template <>
-inline YAML::Node dispatchSer(const std::string &obj) {
+inline YAML::Node to(const std::string &obj) {
   return YAML::Node(obj);
 }
 
 template <>
-inline YAML::Node dispatchSer(const std::filesystem::path &obj) {
+inline YAML::Node to(const std::filesystem::path &obj) {
   return YAML::Node(obj.string());
 }
 
 // Enums
 template <RegisteredEnum EnumT>
-inline YAML::Node dispatchSer(const EnumT &obj) {
+inline YAML::Node to(const EnumT &obj) {
   return YAML::Node(EnumMapping<EnumT>::Type::toString(obj));
 }
 
 // Vector
 template <typename T>
-inline YAML::Node dispatchSer(const std::vector<T> &obj) {
+inline YAML::Node to(const std::vector<T> &obj) {
   YAML::Node node;
   for (size_t i = 0; i < obj.size(); ++i) {
-    node[i] = dispatchSer(obj[i]);
+    node[i] = to(obj[i]);
   }
   return node;
 }
 
 // Map
 template <typename K, typename V>
-inline YAML::Node dispatchSer(const std::map<K, V> &obj) {
+inline YAML::Node to(const std::map<K, V> &obj) {
   YAML::Node node;
   for (const auto &[k, v] : obj) {
-    node[k] = dispatchSer(v);
+    node[k] = to(v);
   }
   return node;
 }
 
 // Optional
 template <typename T>
-inline YAML::Node dispatchSer(const std::optional<T> &obj) {
-  if (obj) return dispatchSer(*obj);
+inline YAML::Node to(const std::optional<T> &obj) {
+  if (obj) return to(*obj);
   return YAML::Node();
 }
 
 // Pair
 template <typename K, typename V>
-inline YAML::Node dispatchSer(const std::pair<K, V> &obj) {
+inline YAML::Node to(const std::pair<K, V> &obj) {
   YAML::Node node;
-  node[0] = dispatchSer(obj.first);
-  node[1] = dispatchSer(obj.second);
+  node[0] = to(obj.first);
+  node[1] = to(obj.second);
   return node;
 }
 
 // Tuple
 template <typename... Args>
-inline YAML::Node dispatchSer(const std::tuple<Args...> &obj) {
+inline YAML::Node to(const std::tuple<Args...> &obj) {
   YAML::Node node;
   size_t i = 0;
   std::apply(
       [&](const auto &...args) {
         (..., [&](const auto &arg) {
-          node[i++] = dispatchSer(arg);
+          node[i++] = to(arg);
         }(args));
       },
       obj);
@@ -467,13 +467,13 @@ inline YAML::Node dispatchSer(const std::tuple<Args...> &obj) {
 
 // Struct
 template <typename T>
-inline YAML::Node dispatchSer(const T &obj) {
+inline YAML::Node to(const T &obj) {
   if constexpr (requires { T::fields; }) {
     YAML::Node node;
     std::apply(
         [&](auto &&...fields) {
           (..., [&](auto &field) {
-            node[std::string(field.fieldName)] = dispatchSer(obj.*(field.memberPtr));
+            node[std::string(field.fieldName)] = to(obj.*(field.memberPtr));
           }(fields));
         },
         T::fields);
@@ -494,7 +494,7 @@ fromYaml(const std::string &yaml) {
   try {
     YAML::Node node = YAML::Load(yaml);
     T obj{};
-    auto result = dispatchDeser(obj, Node(node));
+    auto result = from(obj, Node(node));
     return result.valid ? std::make_pair(std::optional(obj), result)
                         : std::make_pair(std::nullopt, result);
   } catch (const std::exception &e) {
@@ -507,7 +507,7 @@ fromYaml(const std::string &yaml) {
 template <typename T>
 inline std::string toYaml(const T &obj) {
   YAML::Emitter emitter;
-  emitter << dispatchSer(obj);
+  emitter << to(obj);
   return emitter.c_str();
 }
 

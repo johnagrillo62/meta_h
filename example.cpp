@@ -225,7 +225,7 @@ statuses:
 
     if (result.valid)
     {
-        std::cout << "✅ Deserialization successful!\n";
+        std::cout << "Deserialization successful!\n";
         std::cout << "App: " << cfg->app_name << "\n";
         std::cout << "Env: " << cfg->environment << "\n";
         std::cout << "DB Host: " << cfg->database.host << ":" << cfg->database.port << "\n";
