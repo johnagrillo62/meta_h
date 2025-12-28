@@ -8,57 +8,52 @@
 
 #include "meta.h"
 
-struct VectorOfTuples
-{
-    std::vector<std::tuple<std::string, int, bool>> records;
+using namespace meta;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&VectorOfTuples::records>("records", "Records"));
+struct VectorOfTuples {
+  std::vector<std::tuple<std::string, int, bool>> records;
+
+  static constexpr auto fields = std::make_tuple(
+      field<&VectorOfTuples::records>("records", Description{"Records"}));
 };
 
-int main()
-{
-    std::cout << "TEST: Vector of Tuples Deserialization\n";
+int main() {
+  std::cout << "TEST: Vector of Tuples Deserialization\n";
 
-    std::string yaml_str = R"(
+  std::string yaml_str = R"(
 records:
   - [record1, 100, true]
   - [record2, 200, false]
   - [record3, 300, true]
 )";
 
-    YAML::Node node = YAML::Load(yaml_str);
-    auto [result, validation] = meta::reifyFromYaml<VectorOfTuples>(node);
+  YAML::Node node = YAML::Load(yaml_str);
+  auto [result, validation] = meta::reifyFromYaml<VectorOfTuples>(node);
 
-    if (validation.valid && result)
-    {
-        std::cout << "Deserialization succeeded\n";
-        std::cout << "   Size: " << result->records.size() << "\n";
-        for (size_t i = 0; i < result->records.size(); ++i)
-        {
-            std::cout << "   [" << i << "]: [" << std::get<0>(result->records[i]) << ", "
-                      << std::get<1>(result->records[i]) << ", "
-                      << (std::get<2>(result->records[i]) ? "true" : "false") << "]\n";
-        }
-
-        if (result->records.size() == 3 && std::get<0>(result->records[0]) == "record1" &&
-            std::get<1>(result->records[0]) == 100 && std::get<2>(result->records[0]) == true)
-        {
-            std::cout << "All values correct!\n";
-        }
-        else
-        {
-            std::cout << "Values wrong\n";
-        }
-    }
-    else
-    {
-        std::cout << "Deserialization failed\n";
-        for (const auto& [field, err] : validation.errors)
-        {
-            std::cout << "   " << field << ": " << err << "\n";
-        }
+  if (validation.valid && result) {
+    std::cout << "Deserialization succeeded\n";
+    std::cout << "   Size: " << result->records.size() << "\n";
+    for (size_t i = 0; i < result->records.size(); ++i) {
+      std::cout << "   [" << i << "]: [" << std::get<0>(result->records[i])
+                << ", " << std::get<1>(result->records[i]) << ", "
+                << (std::get<2>(result->records[i]) ? "true" : "false")
+                << "]\n";
     }
 
-    return 0;
+    if (result->records.size() == 3 &&
+        std::get<0>(result->records[0]) == "record1" &&
+        std::get<1>(result->records[0]) == 100 &&
+        std::get<2>(result->records[0]) == true) {
+      std::cout << "All values correct!\n";
+    } else {
+      std::cout << "Values wrong\n";
+    }
+  } else {
+    std::cout << "Deserialization failed\n";
+    for (const auto &[field, err] : validation.errors) {
+      std::cout << "   " << field << ": " << err << "\n";
+    }
+  }
+
+  return 0;
 }

@@ -10,48 +10,40 @@
 
 #include "meta.h"
 
-struct SimplePair
-{
-    std::pair<std::string, int> data;
+using namespace meta;
+struct SimplePair {
+  std::pair<std::string, int> data;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&SimplePair::data>("data", "A pair"));
+  static constexpr auto fields = std::make_tuple(
+      field<&SimplePair::data>("data", Description{"A pair"}));
 };
 
-int main()
-{
-    std::cout << "TEST: Simple Pair Deserialization\n";
+int main() {
+  std::cout << "TEST: Simple Pair Deserialization\n";
 
-    std::string yaml_str = R"(
+  std::string yaml_str = R"(
 data: [hello, 42]
 )";
 
-    YAML::Node node = YAML::Load(yaml_str);
-    auto [result, validation] = meta::reifyFromYaml<SimplePair>(node);
+  YAML::Node node = YAML::Load(yaml_str);
+  auto [result, validation] = meta::reifyFromYaml<SimplePair>(node);
 
-    if (validation.valid && result)
-    {
-        std::cout << "Deserialization succeeded\n";
-        std::cout << "   First: [" << result->data.first << "]\n";
-        std::cout << "   Second: " << result->data.second << "\n";
+  if (validation.valid && result) {
+    std::cout << "Deserialization succeeded\n";
+    std::cout << "   First: [" << result->data.first << "]\n";
+    std::cout << "   Second: " << result->data.second << "\n";
 
-        if (result->data.first == "hello" && result->data.second == 42)
-        {
-            std::cout << "Values correct!\n";
-        }
-        else
-        {
-            std::cout << "Values wrong\n";
-        }
+    if (result->data.first == "hello" && result->data.second == 42) {
+      std::cout << "Values correct!\n";
+    } else {
+      std::cout << "Values wrong\n";
     }
-    else
-    {
-        std::cout << "Deserialization failed\n";
-        for (const auto& [field, err] : validation.errors)
-        {
-            std::cout << "   " << field << ": " << err << "\n";
-        }
+  } else {
+    std::cout << "Deserialization failed\n";
+    for (const auto &[field, err] : validation.errors) {
+      std::cout << "   " << field << ": " << err << "\n";
     }
+  }
 
-    return 0;
+  return 0;
 }

@@ -49,9 +49,12 @@ concept FloatingPointType = std::is_floating_point_v<T>;
 // ============================================================================
 // META TUPLE
 // ============================================================================
-// Forward declaration - specializations will provide ::fields
-template <typename T>
-struct MetaTuple;
+template <typename T> 
+struct MetaTuple
+{
+    static_assert(sizeof(T) == 0, "No metadata tuple defined for this type");
+};
+
 
 //============================================================
 // FIELD LOCATION HELPER
@@ -789,7 +792,8 @@ ValidationResult from(std::tuple<Args...>& obj, Node* node)
 }
 
 // Structs with fields
-template <HasFields T>
+template <typename T>
+    requires requires { T::fields; }
 ValidationResult from(T& obj, Node* node)
 {
     if constexpr (requires { typename T::Deser; })
@@ -838,7 +842,7 @@ ValidationResult from(T& obj, Node* node)
                      }, field.attributes);
                  }(fields));
             },
-            get_fields<T>());
+            T::fields);
         return result;
     }
 }
@@ -985,7 +989,8 @@ void to(const std::tuple<Args...>& obj, Builder* b)
 }
 
 // Structs with fields
-template <HasFields T>
+template <typename T>
+    requires requires { T::fields; }
 void to(const T& obj, Builder* b)
 {
     if constexpr (requires { typename T::Ser; })
@@ -1004,7 +1009,7 @@ void to(const T& obj, Builder* b)
                      to(obj.*(field.memberPtr), b);
                  }(fields));
             },
-            get_fields<T>());
+            T::fields);
         b->endMap();
     }
 }
@@ -1085,25 +1090,6 @@ template <typename T> std::string toJson(const T& obj)
     return builder.result();
 }
 
-template <typename T>
-std::string serializeJson(const std::vector<T>& objects)
-{
-    std::stringstream os;
-    os << "[\n";
-    
-    for (size_t i = 0; i < objects.size(); ++i)
-    {
-        os << "  " << toJson(objects[i]);
-        if (i < objects.size() - 1)
-            os << ",";
-        os << "\n";
-    }
-    
-    os << "]\n";
-    return os.str();
-}
-
-
 template <typename T> std::string toXml(const T& obj)
 {
     XmlBuilder builder;
@@ -1118,7 +1104,7 @@ template <typename T> std::string toString(const T& obj)
 
 template <typename T> bool checkForEquality(const T& a, const T& b)
 {
-    if constexpr (HasFields<T>)
+    if constexpr (requires { T::fields; })
     {
         bool equal = true;
         std::apply(
@@ -1130,7 +1116,7 @@ template <typename T> bool checkForEquality(const T& a, const T& b)
                          equal = false;
                  }(fields));
             },
-            get_fields<T>());
+            T::fields);
         return equal;
     }
     else
@@ -1164,3 +1150,4 @@ std::vector<EnumT> enumValues()
 
   
 } // namespace meta
+

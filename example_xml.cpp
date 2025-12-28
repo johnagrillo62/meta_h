@@ -11,336 +11,313 @@
 
 #include "meta.h"
 
-namespace meta
-{
+namespace meta {
 
 // ============================================================================
 // XML BUILDER - Implements Builder interface
 // ============================================================================
 
-class XMLBuilder : public Builder
-{
-  private:
-    std::ostringstream out;
-    std::stack<std::string> tags;
-    std::string currentOpenTag;
-    int indent = 0;
-    int seqDepth = 0; // Track if we're in a sequence
-    bool needsIndent = true;
+class XMLBuilder : public Builder {
+private:
+  std::ostringstream out;
+  std::stack<std::string> tags;
+  std::string currentOpenTag;
+  int indent = 0;
+  int seqDepth = 0; // Track if we're in a sequence
+  bool needsIndent = true;
 
-    std::string escapeXML(const std::string& str) const
-    {
-        std::string result;
-        for (char c : str)
-        {
-            switch (c)
-            {
-            case '&':
-                result += "&amp;";
-                break;
-            case '<':
-                result += "&lt;";
-                break;
-            case '>':
-                result += "&gt;";
-                break;
-            case '"':
-                result += "&quot;";
-                break;
-            case '\'':
-                result += "&apos;";
-                break;
-            default:
-                result += c;
-            }
-        }
-        return result;
-    }
+  void writeNull() override
+  {
+    out << "";
+  }
 
-    void writeIndent()
-    {
-        if (needsIndent)
-        {
-            out << std::string(indent * 2, ' ');
-            needsIndent = false;
-        }
-    }
 
-    void closeCurrentTag()
-    {
-        if (!currentOpenTag.empty())
-        {
-            out << "</" << currentOpenTag << ">\n";
-            currentOpenTag = "";
-            needsIndent = true;
-        }
+  std::string escapeXML(const std::string &str) const {
+    std::string result;
+    for (char c : str) {
+      switch (c) {
+      case '&':
+        result += "&amp;";
+        break;
+      case '<':
+        result += "&lt;";
+        break;
+      case '>':
+        result += "&gt;";
+        break;
+      case '"':
+        result += "&quot;";
+        break;
+      case '\'':
+        result += "&apos;";
+        break;
+      default:
+        result += c;
+      }
     }
+    return result;
+  }
 
-  public:
-    XMLBuilder()
-    {
-        out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        out << "<root>\n";
-        indent++;
-        tags.push("root");
+  void writeIndent() {
+    if (needsIndent) {
+      out << std::string(indent * 2, ' ');
+      needsIndent = false;
     }
+  }
 
-    void writeInt(int v) override
-    {
-        if (seqDepth > 0)
-        {
-            writeIndent();
-            out << "<item>" << v << "</item>\n";
-        }
-        else
-        {
-            writeIndent();
-            out << v;
-        }
+  void closeCurrentTag() {
+    if (!currentOpenTag.empty()) {
+      out << "</" << currentOpenTag << ">\n";
+      currentOpenTag = "";
+      needsIndent = true;
     }
+  }
 
-    void writeDouble(double v) override
-    {
-        if (seqDepth > 0)
-        {
-            writeIndent();
-            out << "<item>" << v << "</item>\n";
-        }
-        else
-        {
-            writeIndent();
-            out << v;
-        }
-    }
+public:
+  XMLBuilder() {
+    out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+    out << "<root>\n";
+    indent++;
+    tags.push("root");
+  }
 
-    void writeBool(bool v) override
-    {
-        std::string val = v ? "true" : "false";
-        if (seqDepth > 0)
-        {
-            writeIndent();
-            out << "<item>" << val << "</item>\n";
-        }
-        else
-        {
-            writeIndent();
-            out << val;
-        }
+  void writeInt(int v) override {
+    if (seqDepth > 0) {
+      writeIndent();
+      out << "<item>" << v << "</item>\n";
+    } else {
+      writeIndent();
+      out << v;
     }
+  }
 
-    void writeString(const std::string& v) override
-    {
-        std::string escaped = escapeXML(v);
-        if (seqDepth > 0)
-        {
-            writeIndent();
-            out << "<item>" << escaped << "</item>\n";
-        }
-        else
-        {
-            writeIndent();
-            out << escaped;
-        }
+  void writeDouble(double v) override {
+    if (seqDepth > 0) {
+      writeIndent();
+      out << "<item>" << v << "</item>\n";
+    } else {
+      writeIndent();
+      out << v;
     }
+  }
 
-    void startSeq(const std::string& elemType = "") override
-    {
-        out << "\n";
-        needsIndent = true; // IMPORTANT: reset after newline
-        writeIndent();
-        out << "<sequence>\n";
-        indent++;
-        seqDepth++;
-        tags.push("sequence");
-        needsIndent = true;
+  void writeBool(bool v) override {
+    std::string val = v ? "true" : "false";
+    if (seqDepth > 0) {
+      writeIndent();
+      out << "<item>" << val << "</item>\n";
+    } else {
+      writeIndent();
+      out << val;
     }
+  }
 
-    void endSeq() override
-    {
-        indent--;
-        seqDepth--;
-        needsIndent = true;
-        writeIndent();
-        out << "</sequence>";
-        tags.pop();
-        needsIndent = false;
+  void writeString(const std::string &v) override {
+    std::string escaped = escapeXML(v);
+    if (seqDepth > 0) {
+      writeIndent();
+      out << "<item>" << escaped << "</item>\n";
+    } else {
+      writeIndent();
+      out << escaped;
     }
+  }
 
-    void startFlowSeq() override
-    {
-        writeIndent();
-        out << "<item>";
-        tags.push("item");
-    }
+  void startSeq(const std::string &elemType = "") override {
+    out << "\n";
+    needsIndent = true; // IMPORTANT: reset after newline
+    writeIndent();
+    out << "<sequence>\n";
+    indent++;
+    seqDepth++;
+    tags.push("sequence");
+    needsIndent = true;
+  }
 
-    void endFlowSeq() override
-    {
-        out << "</item>\n";
-        tags.pop();
-        needsIndent = true;
-    }
+  void endSeq() override {
+    indent--;
+    seqDepth--;
+    needsIndent = true;
+    writeIndent();
+    out << "</sequence>";
+    tags.pop();
+    needsIndent = false;
+  }
 
-    void startMap(const std::string& valueType = "") override
-    {
-        out << "\n";
-        needsIndent = true; // Reset after newline
-        writeIndent();
-        out << "<map>\n";
-        indent++;
-        tags.push("map");
-        needsIndent = true;
-    }
+  void startFlowSeq() override {
+    writeIndent();
+    out << "<item>";
+    tags.push("item");
+  }
 
-    void endMap() override
-    {
-        indent--;
-        needsIndent = true;
-        writeIndent();
-        out << "</map>";
-        tags.pop();
-        needsIndent = false;
-    }
+  void endFlowSeq() override {
+    out << "</item>\n";
+    tags.pop();
+    needsIndent = true;
+  }
 
-    void key(const std::string& k) override
-    {
-        closeCurrentTag();
-        writeIndent();
-        out << "<" << k << ">";
-        currentOpenTag = k;
-        needsIndent = false;
-    }
+  void startMap(const std::string &valueType = "") override {
+    out << "\n";
+    needsIndent = true; // Reset after newline
+    writeIndent();
+    out << "<map>\n";
+    indent++;
+    tags.push("map");
+    needsIndent = true;
+  }
 
-    std::string result() override
-    {
-        closeCurrentTag();
-        // Close any remaining open container tags
-        while (!tags.empty() && tags.top() != "root")
-        {
-            std::string tag = tags.top();
-            indent--;
-            needsIndent = true;
-            writeIndent();
-            out << "</" << tag << ">\n";
-            tags.pop();
-        }
-        // Close root
-        indent--;
-        needsIndent = true;
-        writeIndent();
-        out << "</root>\n";
-        return out.str();
+  void endMap() override {
+    indent--;
+    needsIndent = true;
+    writeIndent();
+    out << "</map>";
+    tags.pop();
+    needsIndent = false;
+  }
+
+  void key(const std::string &k) override {
+    closeCurrentTag();
+    writeIndent();
+    out << "<" << k << ">";
+    currentOpenTag = k;
+    needsIndent = false;
+  }
+
+  std::string result() override {
+    closeCurrentTag();
+    // Close any remaining open container tags
+    while (!tags.empty() && tags.top() != "root") {
+      std::string tag = tags.top();
+      indent--;
+      needsIndent = true;
+      writeIndent();
+      out << "</" << tag << ">\n";
+      tags.pop();
     }
+    // Close root
+    indent--;
+    needsIndent = true;
+    writeIndent();
+    out << "</root>\n";
+    return out.str();
+  }
 };
 
 // ============================================================================
 // PUBLIC API
 // ============================================================================
 
-template <typename T> std::string toXML(const T& obj)
-{
-    XMLBuilder builder;
-    to(obj, &builder);
-    return builder.result();
+template <typename T> std::string toXML(const T &obj) {
+  XMLBuilder builder;
+  to(obj, &builder);
+  return builder.result();
 }
 
 } // namespace meta
+
+using namespace meta;
 
 // ============================================================================
 // EXAMPLE STRUCTURES
 // ============================================================================
 
-struct Person
-{
-    std::string name;
-    int age;
-    std::string email;
-    std::vector<std::string> hobbies;
+struct Person {
+  std::string name;
+  int age;
+  std::string email;
+  std::vector<std::string> hobbies;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Person::name>("name", "Person's name"),
-                        meta::Field<&Person::age>("age", "Person's age"),
-                        meta::Field<&Person::email>("email", "Email address"),
-                        meta::Field<&Person::hobbies>("hobbies", "List of hobbies"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Person::name>("name", Description{"Person's name"}),
+      field<&Person::age>("age", Description{"Person's age"}),
+      field<&Person::email>("email", Description{"Email address"}),
+      field<&Person::hobbies>("hobbies", Description{"List of hobbies"}));
 };
 
-struct Company
-{
-    std::string name;
-    int employees;
-    double revenue;
-    std::map<std::string, int> departments;
+struct Company {
+  std::string name;
+  int employees;
+  double revenue;
+  std::map<std::string, int> departments;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Company::name>("name", "Company name"),
-                        meta::Field<&Company::employees>("employees", "Number of employees"),
-                        meta::Field<&Company::revenue>("revenue", "Annual revenue"),
-                        meta::Field<&Company::departments>("departments", "Department counts"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Company::name>("name", Description{"Company name"}),
+      field<&Company::employees>("employees",
+                                     Description{"Number of employees"}),
+      field<&Company::revenue>("revenue", Description{"Annual revenue"}),
+      field<&Company::departments>("departments",
+                                       Description{"Department counts"}));
 };
 
-struct Contact
-{
-    std::string name;
-    std::string phone;
-    std::string address;
-    std::optional<std::string> website;
-    std::vector<std::string> tags;
+struct Contact {
+  std::string name;
+  std::string phone;
+  std::string address;
+  std::optional<std::string> website;
+  std::vector<std::string> tags;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Contact::name>("name", "Contact name"),
-                        meta::Field<&Contact::phone>("phone", "Phone number"),
-                        meta::Field<&Contact::address>("address", "Street address"),
-                        meta::Field<&Contact::website>("website", "Website URL"),
-                        meta::Field<&Contact::tags>("tags", "Contact tags"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Contact::name>("name", Description{"Contact name"}),
+      field<&Contact::phone>("phone", Description{"Phone number"}),
+      field<&Contact::address>("address", Description{"Street address"}),
+      field<&Contact::website>("website", Description{"Website URL"}),
+      field<&Contact::tags>("tags", Description{"Contact tags"}));
 };
 
 // ============================================================================
 // MAIN
 // ============================================================================
 
-int main()
-{
-    std::cout << "          XML Output Using meta.h Serializer            \n";
+int main() {
+  std::cout << "          XML Output Using meta.h Serializer            \n";
 
-    // Example 1: Simple Struct
-    std::cout << "--- Example 1: Simple Person XML ---\n\n";
-    Person person{"Alice Johnson", 28, "alice@example.com", {"reading", "coding", "hiking"}};
-    std::cout << meta::toXML(person) << "\n";
+  // Example 1: Simple Struct
+  std::cout << "--- Example 1: Simple Person XML ---\n\n";
+  Person person{"Alice Johnson",
+                28,
+                "alice@example.com",
+                {"reading", "coding", "hiking"}};
+  std::cout << meta::toXML(person) << "\n";
 
-    // Example 2: Struct with Maps
-    std::cout << "\n--- Example 2: Company with Departments ---\n\n";
-    Company company{"TechCorp",
-                    150,
-                    5000000.0,
-                    {{"Engineering", 60}, {"Sales", 50}, {"HR", 20}, {"Operations", 20}}};
-    std::cout << meta::toXML(company) << "\n";
+  // Example 2: Struct with Maps
+  std::cout << "\n--- Example 2: Company with Departments ---\n\n";
+  Company company{
+      "TechCorp",
+      150,
+      5000000.0,
+      {{"Engineering", 60}, {"Sales", 50}, {"HR", 20}, {"Operations", 20}}};
+  std::cout << meta::toXML(company) << "\n";
 
-    // Example 3: Struct with Optional
-    std::cout << "\n--- Example 3: Contact with Optional Website ---\n\n";
-    Contact contact1{"John Doe",
-                     "555-0123",
-                     "123 Main St, Springfield",
-                     "https://johndoe.com",
-                     {"client", "important", "vip"}};
-    std::cout << meta::toXML(contact1) << "\n";
+  // Example 3: Struct with Optional
+  std::cout << "\n--- Example 3: Contact with Optional Website ---\n\n";
+  Contact contact1{"John Doe",
+                   "555-0123",
+                   "123 Main St, Springfield",
+                   "https://johndoe.com",
+                   {"client", "important", "vip"}};
+  std::cout << meta::toXML(contact1) << "\n";
 
-    // Example 4: Contact without Optional
-    std::cout << "\n--- Example 4: Contact without Website ---\n\n";
-    Contact contact2{
-        "Jane Smith", "555-0456", "456 Oak Ave, Springfield", std::nullopt, {"prospect"}};
-    std::cout << meta::toXML(contact2) << "\n";
+  // Example 4: Contact without Optional
+  std::cout << "\n--- Example 4: Contact without Website ---\n\n";
+  Contact contact2{"Jane Smith",
+                   "555-0456",
+                   "456 Oak Ave, Springfield",
+                   std::nullopt,
+                   {"prospect"}};
+  std::cout << meta::toXML(contact2) << "\n";
 
-    // Example 5: Format Comparison
-    std::cout << "\n--- Example 5: Same Data in Three Formats ---\n\n";
-    Person p{"Eve Davis", 26, "eve@example.com", {"writing", "photography"}};
+  // Example 5: Format Comparison
+  std::cout << "\n--- Example 5: Same Data in Three Formats ---\n\n";
+  Person p{"Eve Davis", 26, "eve@example.com", {"writing", "photography"}};
 
-    std::cout << "YAML:\n";
-    std::cout << meta::toYaml(p) << "\n";
+  std::cout << "YAML:\n";
+  std::cout << meta::toYaml(p) << "\n";
 
-    std::cout << "JSON:\n";
-    std::cout << meta::toJson(p) << "\n";
+  std::cout << "JSON:\n";
+  std::cout << meta::toJson(p) << "\n";
 
-    std::cout << "XML:\n";
-    std::cout << meta::toXML(p) << "\n";
+  std::cout << "XML:\n";
+  std::cout << meta::toXML(p) << "\n";
 
-    return 0;
+  return 0;
 }

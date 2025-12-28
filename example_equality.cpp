@@ -9,18 +9,13 @@
 
 #include "meta.h"
 
+using namespace meta;
+
 // ============================================================================
 // ENUM DEFINITION
 // ============================================================================
 
-enum class LogLevel
-{
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Critical
-};
+enum class LogLevel { Debug, Info, Warning, Error, Critical };
 
 constexpr std::array LogLevelMapping = std::array{
     std::pair{LogLevel::Debug, "debug"},
@@ -30,65 +25,62 @@ constexpr std::array LogLevelMapping = std::array{
     std::pair{LogLevel::Critical, "critical"},
 };
 
-template <> struct meta::EnumMapping<LogLevel>
-{
-    static constexpr auto& mapping = LogLevelMapping;
-    using Type = meta::EnumTraitsAuto<LogLevel, LogLevelMapping>;
+template <> struct meta::EnumMapping<LogLevel> {
+  static constexpr auto &mapping = LogLevelMapping;
+  using Type = meta::EnumTraitsAuto<LogLevel, LogLevelMapping>;
 };
 
 // ============================================================================
 // STRUCT
 // ============================================================================
 
-struct LogEntry
-{
-    std::string message;
-    LogLevel level;
-    int line_number;
+struct LogEntry {
+  std::string message;
+  LogLevel level;
+  int line_number;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&LogEntry::message>{"message", "Log message"},
-                        meta::Field<&LogEntry::level>{"level", "Log level"},
-                        meta::Field<&LogEntry::line_number>{"line_number", "Line number"});
+  static constexpr auto fields = std::make_tuple(
+      field<&LogEntry::message>("message", Description{"Log message"}),
+      field<&LogEntry::level>("level", Description{"Log level"}),
+      field<&LogEntry::line_number>("line_number",
+                                        Description{"Line number"}));
 };
 
 // ============================================================================
 // MAIN
 // ============================================================================
 
-int main()
-{
-    std::cout << "============================================================\n";
-    std::cout << "Automatic Equality Comparison\n";
-    std::cout << "============================================================\n\n";
+int main() {
+  std::cout << "============================================================\n";
+  std::cout << "Automatic Equality Comparison\n";
+  std::cout
+      << "============================================================\n\n";
 
-    LogEntry log1{"Error occurred", LogLevel::Error, 42};
-    LogEntry log2{"Error occurred", LogLevel::Error, 42};
-    LogEntry log3{"Different message", LogLevel::Warning, 100};
+  LogEntry log1{"Error occurred", LogLevel::Error, 42};
+  LogEntry log2{"Error occurred", LogLevel::Error, 42};
+  LogEntry log3{"Different message", LogLevel::Warning, 100};
 
-    // Test equality
-    std::cout << "log1 == log2: " << (meta::checkForEquality(log1, log2) ? "true" : "false")
-              << "\n";
-    std::cout << "log1 != log2: " << (!meta::checkForEquality(log1, log2) ? "true" : "false")
-              << "\n";
-    std::cout << "\n";
+  // Test equality
+  std::cout << "log1 == log2: "
+            << (meta::checkForEquality(log1, log2) ? "true" : "false") << "\n";
+  std::cout << "log1 != log2: "
+            << (!meta::checkForEquality(log1, log2) ? "true" : "false") << "\n";
+  std::cout << "\n";
 
-    std::cout << "log1 == log3: " << (meta::checkForEquality(log1, log3) ? "true" : "false")
-              << "\n";
-    std::cout << "log1 != log3: " << (!meta::checkForEquality(log1, log3) ? "true" : "false")
-              << "\n";
-    std::cout << "\n";
+  std::cout << "log1 == log3: "
+            << (meta::checkForEquality(log1, log3) ? "true" : "false") << "\n";
+  std::cout << "log1 != log3: "
+            << (!meta::checkForEquality(log1, log3) ? "true" : "false") << "\n";
+  std::cout << "\n";
 
-    // Test in conditions
-    if (meta::checkForEquality(log1, log2))
-    {
-        std::cout << " log1 and log2 are equal\n";
-    }
+  // Test in conditions
+  if (meta::checkForEquality(log1, log2)) {
+    std::cout << " log1 and log2 are equal\n";
+  }
 
-    if (!meta::checkForEquality(log1, log3))
-    {
-        std::cout << " log1 and log3 are different\n";
-    }
+  if (!meta::checkForEquality(log1, log3)) {
+    std::cout << " log1 and log3 are different\n";
+  }
 
-    return 0;
+  return 0;
 }

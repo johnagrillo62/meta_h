@@ -9,19 +9,13 @@
 
 #include "meta.h"
 
+using namespace meta;
 // ============================================================================
 // ENUM DEFINITION
 // ============================================================================
 
 // Step 1: Define the enum
-enum class LogLevel
-{
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Critical
-};
+enum class LogLevel { Debug, Info, Warning, Error, Critical };
 
 // Step 2: Create mapping array
 constexpr std::array LogLevelMapping = std::array{
@@ -33,93 +27,86 @@ constexpr std::array LogLevelMapping = std::array{
 };
 
 // Step 3: Register enum
-template <> struct meta::EnumMapping<LogLevel>
-{
-    static constexpr auto& mapping = LogLevelMapping;
-    using Type = meta::EnumTraitsAuto<LogLevel, LogLevelMapping>;
+template <> struct meta::EnumMapping<LogLevel> {
+  static constexpr auto &mapping = LogLevelMapping;
+  using Type = meta::EnumTraitsAuto<LogLevel, LogLevelMapping>;
 };
 
 // ============================================================================
 // STRUCT WITH ENUM FIELD
 // ============================================================================
 
-struct LogEntry
-{
-    std::string message;
-    LogLevel level;
-    int line_number;
+struct LogEntry {
+  std::string message;
+  LogLevel level;
+  int line_number;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&LogEntry::message>{"message", "Log message"},
-                        meta::Field<&LogEntry::level>{"level", "Log level"},
-                        meta::Field<&LogEntry::line_number>{"line_number", "Line number"});
+  static constexpr auto fields = std::make_tuple(
+      field<&LogEntry::message>("message", Description{"Log message"}),
+      field<&LogEntry::level>("level", Description{"Log level"}),
+      field<&LogEntry::line_number>("line_number",
+                                        Description{"Line number"}));
 };
 
 // ============================================================================
 // USAGE
 // ============================================================================
 
-int main()
-{
-    std::cout << "============================================================\n";
-    std::cout << "LogEntry Serialization/Deserialization Example\n";
-    std::cout << "============================================================\n\n";
+int main() {
+  std::cout << "============================================================\n";
+  std::cout << "LogEntry Serialization/Deserialization Example\n";
+  std::cout
+      << "============================================================\n\n";
 
-    // Create and serialize
-    LogEntry log{"Database connection failed", LogLevel::Error, 42};
+  // Create and serialize
+  LogEntry log{"Database connection failed", LogLevel::Error, 42};
 
-    std::cout << "Original LogEntry:\n";
-    std::cout << meta::toString(log) << "\n";
+  std::cout << "Original LogEntry:\n";
+  std::cout << meta::toString(log) << "\n";
 
-    std::cout << "\n--- YAML ---\n";
-    std::cout << meta::toYaml(log);
+  std::cout << "\n--- YAML ---\n";
+  std::cout << meta::toYaml(log);
 
-    std::cout << "\n--- JSON ---\n";
-    std::cout << meta::toJson(log) << "\n";
+  std::cout << "\n--- JSON ---\n";
+  std::cout << meta::toJson(log) << "\n";
 
-    // Deserialize from YAML
-    std::cout << "\n--- DESERIALIZATION ---\n";
-    YAML::Node yaml = YAML::Load(R"(
+  // Deserialize from YAML
+  std::cout << "\n--- DESERIALIZATION ---\n";
+  YAML::Node yaml = YAML::Load(R"(
 message: Something went wrong
 level: error
 line_number: 42
 )");
 
-    auto [entry, result] = meta::reifyFromYaml<LogEntry>(yaml);
+  auto [entry, result] = meta::reifyFromYaml<LogEntry>(yaml);
 
-    if (result.valid && entry)
-    {
-        std::cout << "✅ Deserialization successful!\n";
-        std::cout << "Message: " << entry->message << "\n";
-        std::cout << "Level: " << entry->level << "\n";
-        std::cout << "Line: " << entry->line_number << "\n";
+  if (result.valid && entry) {
+    std::cout << "✅ Deserialization successful!\n";
+    std::cout << "Message: " << entry->message << "\n";
+    std::cout << "Level: " << entry->level << "\n";
+    std::cout << "Line: " << entry->line_number << "\n";
+  } else {
+    std::cout << "❌ Deserialization failed\n";
+    for (const auto &[field, msg] : result.errors) {
+      std::cout << "  " << field << ": " << msg << "\n";
     }
-    else
-    {
-        std::cout << "❌ Deserialization failed\n";
-        for (const auto& [field, msg] : result.errors)
-        {
-            std::cout << "  " << field << ": " << msg << "\n";
-        }
-    }
+  }
 
-    // Test invalid enum
-    std::cout << "\n--- TESTING INVALID ENUM ---\n";
-    YAML::Node bad_yaml = YAML::Load(R"(
+  // Test invalid enum
+  std::cout << "\n--- TESTING INVALID ENUM ---\n";
+  YAML::Node bad_yaml = YAML::Load(R"(
 message: Test
 level: INVALID_LEVEL
 line_number: 100
 )");
 
-    auto [bad_entry, bad_result] = meta::reifyFromYaml<LogEntry>(bad_yaml);
-    if (!bad_result.valid)
-    {
-        std::cout << "Error caught (as expected):\n";
-        for (const auto& [field, msg] : bad_result.errors)
-        {
-            std::cout << "  " << msg << "\n";
-        }
+  auto [bad_entry, bad_result] = meta::reifyFromYaml<LogEntry>(bad_yaml);
+  if (!bad_result.valid) {
+    std::cout << "Error caught (as expected):\n";
+    for (const auto &[field, msg] : bad_result.errors) {
+      std::cout << "  " << msg << "\n";
     }
+  }
 
-    return 0;
+  return 0;
 }

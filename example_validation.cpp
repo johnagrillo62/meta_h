@@ -9,54 +9,48 @@
 
 #include "meta.h"
 
-struct User
-{
-    std::string username;
-    std::string email;
-    int score;
+using namespace meta;
+struct User {
+  std::string username;
+  std::string email;
+  int score;
 
-    static constexpr auto fields = std::tuple{meta::Field<&User::username>("username", "Username"),
-                                              meta::Field<&User::email>("email", "Email address"),
-                                              meta::Field<&User::score>("score", "User score")};
+  static constexpr auto fields = std::tuple(
+      field<&User::username>("username", Description{"Username"}),
+      field<&User::email>("email", Description{"Email address"}),
+      field<&User::score>("score", Description{"User score"}));
 };
 
-int main()
-{
-    // Valid YAML
-    YAML::Node valid = YAML::Load(R"(
+int main() {
+  // Valid YAML
+  YAML::Node valid = YAML::Load(R"(
     username: john_doe
     email: john@example.com
     score: 100
   )");
 
-    auto [user, result] = meta::reifyFromYaml<User>(valid);
-    if (user)
-    {
-        std::cout << "Valid!\n" << meta::toString(*user);
+  auto [user, result] = meta::reifyFromYaml<User>(valid);
+  if (user) {
+    std::cout << "Valid!\n" << meta::toString(*user);
+  } else {
+    std::cout << "Invalid:\n";
+    for (const auto &[field, msg] : result.errors) {
+      std::cout << "  " << field << ": " << msg << "\n";
     }
-    else
-    {
-        std::cout << "Invalid:\n";
-        for (const auto& [field, msg] : result.errors)
-        {
-            std::cout << "  " << field << ": " << msg << "\n";
-        }
-    }
+  }
 
-    // Missing required field
-    YAML::Node invalid = YAML::Load(R"(
+  // Missing required field
+  YAML::Node invalid = YAML::Load(R"(
     username: jane_doe
   )");
 
-    auto [user2, result2] = meta::reifyFromYaml<User>(invalid);
-    if (!user2)
-    {
-        std::cout << "\nMissing fields:\n";
-        for (const auto& [field, msg] : result2.errors)
-        {
-            std::cout << "  " << field << ": " << msg << "\n";
-        }
+  auto [user2, result2] = meta::reifyFromYaml<User>(invalid);
+  if (!user2) {
+    std::cout << "\nMissing fields:\n";
+    for (const auto &[field, msg] : result2.errors) {
+      std::cout << "  " << field << ": " << msg << "\n";
     }
+  }
 
-    return 0;
+  return 0;
 }

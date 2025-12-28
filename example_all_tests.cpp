@@ -11,437 +11,417 @@
 
 #include "meta.h"
 
+using namespace meta;
 // ============================================================================
 // TEST SUITE - Meta Framework Validation
 // ============================================================================
 
-struct TestResult
-{
-    std::string name;
-    bool passed;
-    std::string expected;
-    std::string actual;
+struct TestResult {
+  std::string name;
+  bool passed;
+  std::string expected;
+  std::string actual;
 };
 
 std::vector<TestResult> results;
 
-void reportTest(const std::string& name,
-                bool passed,
-                const std::string& expected,
-                const std::string& actual)
-{
-    results.push_back({name, passed, expected, actual});
-    if (passed)
-    {
-        std::cout << "" << name << "\n";
-    }
-    else
-    {
-        std::cout << "" << name << "\n";
-        std::cout << "   Expected: " << expected << "\n";
-        std::cout << "   Actual:   " << actual << "\n";
-    }
+void reportTest(const std::string &name, bool passed,
+                const std::string &expected, const std::string &actual) {
+  results.push_back({name, passed, expected, actual});
+  if (passed) {
+    std::cout << "" << name << "\n";
+  } else {
+    std::cout << "" << name << "\n";
+    std::cout << "   Expected: " << expected << "\n";
+    std::cout << "   Actual:   " << actual << "\n";
+  }
 }
 
 // ============================================================================
 // TEST 1: Map of Structs
 // ============================================================================
 
-struct Person
-{
-    std::string name;
-    int age;
+struct Person {
+  std::string name;
+  int age;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Person::name>("name", "Person's name"),
-                        meta::Field<&Person::age>("age", "Person's age"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Person::name>("name", Description{"Person's name"}),
+      field<&Person::age>("age", Description{"Person's age"}));
 };
 
-struct Team
-{
-    std::map<std::string, Person> members;
+struct Team {
+  std::map<std::string, Person> members;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Team::members>("members", "Team members"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Team::members>("members", Description{"Team members"}));
 };
 
-void testMapOfStructs()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 1: Map of Structs\n";
-    std::cout << "============================================================\n";
+void testMapOfStructs() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 1: Map of Structs\n";
+  std::cout << "============================================================\n";
 
-    Team team{{{"alice", {"Alice Johnson", 30}}, {"bob", {"Bob Smith", 25}}}};
+  Team team{{{"alice", {"Alice Johnson", 30}}, {"bob", {"Bob Smith", 25}}}};
 
-    std::string yaml = meta::toYaml(team);
-    std::string json = meta::toJson(team);
+  std::string yaml = meta::toYaml(team);
+  std::string json = meta::toJson(team);
 
-    // Expected output for YAML
-    std::string expected_yaml = "members:\n"
-                                "  alice:\n"
-                                "    name: Alice Johnson\n"
-                                "    age: 30\n"
-                                "  bob:\n"
-                                "    name: Bob Smith\n"
-                                "    age: 25\n";
+  // Expected output for YAML
+  std::string expected_yaml = "members:\n"
+                              "  alice:\n"
+                              "    name: Alice Johnson\n"
+                              "    age: 30\n"
+                              "  bob:\n"
+                              "    name: Bob Smith\n"
+                              "    age: 25\n";
 
-    bool yaml_ok =
-        (yaml.find("alice") != std::string::npos &&
-         yaml.find("Alice Johnson") != std::string::npos && yaml.find("bob") != std::string::npos);
+  bool yaml_ok = (yaml.find("alice") != std::string::npos &&
+                  yaml.find("Alice Johnson") != std::string::npos &&
+                  yaml.find("bob") != std::string::npos);
 
-    reportTest("Map<string, Struct> YAML serialization", yaml_ok, expected_yaml, yaml);
+  reportTest("Map<string, Struct> YAML serialization", yaml_ok, expected_yaml,
+             yaml);
 
-    bool json_ok = (json.find("alice") != std::string::npos &&
-                    json.find("Alice Johnson") != std::string::npos);
+  bool json_ok = (json.find("alice") != std::string::npos &&
+                  json.find("Alice Johnson") != std::string::npos);
 
-    reportTest(
-        "Map<string, Struct> JSON serialization", json_ok, "{...alice...Alice Johnson...}", json);
+  reportTest("Map<string, Struct> JSON serialization", json_ok,
+             "{...alice...Alice Johnson...}", json);
 }
 
 // ============================================================================
 // TEST 2: Map of Vectors
 // ============================================================================
 
-struct Region
-{
-    std::map<std::string, std::vector<int>> data;
+struct Region {
+  std::map<std::string, std::vector<int>> data;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Region::data>("data", "Regional data"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Region::data>("data", Description{"Regional data"}));
 };
 
-void testMapOfVectors()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 2: Map of Vectors\n";
-    std::cout << "============================================================\n";
+void testMapOfVectors() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 2: Map of Vectors\n";
+  std::cout << "============================================================\n";
 
-    Region region{{{"north", {10, 20, 30}}, {"south", {15, 25}}}};
+  Region region{{{"north", {10, 20, 30}}, {"south", {15, 25}}}};
 
-    std::string yaml = meta::toYaml(region);
-    std::string json = meta::toJson(region);
+  std::string yaml = meta::toYaml(region);
+  std::string json = meta::toJson(region);
 
-    bool yaml_ok =
-        (yaml.find("north") != std::string::npos && yaml.find("10") != std::string::npos &&
-         yaml.find("south") != std::string::npos && yaml.find("15") != std::string::npos);
+  bool yaml_ok = (yaml.find("north") != std::string::npos &&
+                  yaml.find("10") != std::string::npos &&
+                  yaml.find("south") != std::string::npos &&
+                  yaml.find("15") != std::string::npos);
 
-    reportTest(
-        "Map<string, Vector<int>> YAML", yaml_ok, "north:\\n    - 10\\n    - 20\\n    - 30", yaml);
+  reportTest("Map<string, Vector<int>> YAML", yaml_ok,
+             "north:\\n    - 10\\n    - 20\\n    - 30", yaml);
 
-    bool json_ok =
-        (json.find("north") != std::string::npos && json.find("[10") != std::string::npos);
+  bool json_ok = (json.find("north") != std::string::npos &&
+                  json.find("[10") != std::string::npos);
 
-    reportTest("Map<string, Vector<int>> JSON", json_ok, "{\"north\":[10,20,30],...}", json);
+  reportTest("Map<string, Vector<int>> JSON", json_ok,
+             "{\"north\":[10,20,30],...}", json);
 }
 
 // ============================================================================
 // TEST 3: Vector of Maps
 // ============================================================================
 
-struct Records
-{
-    std::vector<std::map<std::string, int>> items;
+struct Records {
+  std::vector<std::map<std::string, int>> items;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Records::items>("items", "List of records"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Records::items>("items", Description{"List of records"}));
 };
 
-void testVectorOfMaps()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 3: Vector of Maps\n";
-    std::cout << "============================================================\n";
+void testVectorOfMaps() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 3: Vector of Maps\n";
+  std::cout << "============================================================\n";
 
-    Records records{{{{"a", 1}, {"b", 2}}, {{"c", 3}, {"d", 4}}}};
+  Records records{{{{"a", 1}, {"b", 2}}, {{"c", 3}, {"d", 4}}}};
 
-    std::string yaml = meta::toYaml(records);
-    std::string json = meta::toJson(records);
+  std::string yaml = meta::toYaml(records);
+  std::string json = meta::toJson(records);
 
-    bool yaml_ok = (yaml.find("items") != std::string::npos &&
-                    yaml.find("a:") != std::string::npos && yaml.find("c:") != std::string::npos);
+  bool yaml_ok = (yaml.find("items") != std::string::npos &&
+                  yaml.find("a:") != std::string::npos &&
+                  yaml.find("c:") != std::string::npos);
 
-    reportTest("Vector<Map<string, int>> YAML",
-               yaml_ok,
-               "items:\\n  - a: 1\\n    b: 2\\n  - c: 3\\n    d: 4",
-               yaml);
+  reportTest("Vector<Map<string, int>> YAML", yaml_ok,
+             "items:\\n  - a: 1\\n    b: 2\\n  - c: 3\\n    d: 4", yaml);
 
-    bool json_ok =
-        (json.find("[{") != std::string::npos && json.find("\"a\":1") != std::string::npos);
+  bool json_ok = (json.find("[{") != std::string::npos &&
+                  json.find("\"a\":1") != std::string::npos);
 
-    reportTest(
-        "Vector<Map<string, int>> JSON", json_ok, "[{\"a\":1,\"b\":2},{\"c\":3,\"d\":4}]", json);
+  reportTest("Vector<Map<string, int>> JSON", json_ok,
+             "[{\"a\":1,\"b\":2},{\"c\":3,\"d\":4}]", json);
 }
 
 // ============================================================================
 // TEST 4: Nested Maps (Map of Map)
 // ============================================================================
 
-struct NestedMaps
-{
-    std::map<std::string, std::map<std::string, int>> matrix;
+struct NestedMaps {
+  std::map<std::string, std::map<std::string, int>> matrix;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&NestedMaps::matrix>("matrix", "2D matrix"));
+  static constexpr auto fields = std::make_tuple(
+      field<&NestedMaps::matrix>("matrix", Description{"2D matrix"}));
 };
 
-void testNestedMaps()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 4: Nested Maps (Map of Map)\n";
-    std::cout << "============================================================\n";
+void testNestedMaps() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 4: Nested Maps (Map of Map)\n";
+  std::cout << "============================================================\n";
 
-    NestedMaps nested{
-        {{"row1", {{"col1", 10}, {"col2", 20}}}, {"row2", {{"col1", 30}, {"col2", 40}}}}};
+  NestedMaps nested{{{"row1", {{"col1", 10}, {"col2", 20}}},
+                     {"row2", {{"col1", 30}, {"col2", 40}}}}};
 
-    std::string yaml = meta::toYaml(nested);
-    std::string json = meta::toJson(nested);
+  std::string yaml = meta::toYaml(nested);
+  std::string json = meta::toJson(nested);
 
-    bool yaml_ok = (yaml.find("row1") != std::string::npos &&
-                    yaml.find("col1") != std::string::npos && yaml.find("10") != std::string::npos);
+  bool yaml_ok = (yaml.find("row1") != std::string::npos &&
+                  yaml.find("col1") != std::string::npos &&
+                  yaml.find("10") != std::string::npos);
 
-    reportTest("Map<string, Map<string, int>> YAML",
-               yaml_ok,
-               "matrix:\\n  row1:\\n    col1: 10\\n    col2: 20",
-               yaml);
+  reportTest("Map<string, Map<string, int>> YAML", yaml_ok,
+             "matrix:\\n  row1:\\n    col1: 10\\n    col2: 20", yaml);
 
-    bool json_ok =
-        (json.find("row1") != std::string::npos && json.find("{\"col1\":10") != std::string::npos);
+  bool json_ok = (json.find("row1") != std::string::npos &&
+                  json.find("{\"col1\":10") != std::string::npos);
 
-    reportTest(
-        "Map<string, Map<string, int>> JSON", json_ok, "{\"row1\":{\"col1\":10,...},...}", json);
+  reportTest("Map<string, Map<string, int>> JSON", json_ok,
+             "{\"row1\":{\"col1\":10,...},...}", json);
 }
 
 // ============================================================================
 // TEST 5: Vector of Structs
 // ============================================================================
 
-struct People
-{
-    std::vector<Person> list;
+struct People {
+  std::vector<Person> list;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&People::list>("list", "List of people"));
+  static constexpr auto fields = std::make_tuple(
+      field<&People::list>("list", Description{"List of people"}));
 };
 
-void testVectorOfStructs()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 5: Vector of Structs\n";
-    std::cout << "============================================================\n";
+void testVectorOfStructs() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 5: Vector of Structs\n";
+  std::cout << "============================================================\n";
 
-    People people{{{"Charlie", 35}, {"Diana", 28}}};
+  People people{{{"Charlie", 35}, {"Diana", 28}}};
 
-    std::string yaml = meta::toYaml(people);
-    std::string json = meta::toJson(people);
+  std::string yaml = meta::toYaml(people);
+  std::string json = meta::toJson(people);
 
-    bool yaml_ok =
-        (yaml.find("Charlie") != std::string::npos && yaml.find("35") != std::string::npos &&
-         yaml.find("Diana") != std::string::npos);
+  bool yaml_ok = (yaml.find("Charlie") != std::string::npos &&
+                  yaml.find("35") != std::string::npos &&
+                  yaml.find("Diana") != std::string::npos);
 
-    reportTest("Vector<Struct> YAML", yaml_ok, "list:\\n  - name: Charlie\\n    age: 35", yaml);
+  reportTest("Vector<Struct> YAML", yaml_ok,
+             "list:\\n  - name: Charlie\\n    age: 35", yaml);
 
-    bool json_ok =
-        (json.find("Charlie") != std::string::npos && json.find("[{") != std::string::npos);
+  bool json_ok = (json.find("Charlie") != std::string::npos &&
+                  json.find("[{") != std::string::npos);
 
-    reportTest("Vector<Struct> JSON", json_ok, "[{\"name\":\"Charlie\",\"age\":35}]", json);
+  reportTest("Vector<Struct> JSON", json_ok,
+             "[{\"name\":\"Charlie\",\"age\":35}]", json);
 }
 
 // ============================================================================
 // TEST 6: Complex Nested Structure
 // ============================================================================
 
-struct Address
-{
-    std::string city;
-    std::string country;
+struct Address {
+  std::string city;
+  std::string country;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Address::city>("city", "City"),
-                        meta::Field<&Address::country>("country", "Country"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Address::city>("city", Description{"City"}),
+      field<&Address::country>("country", Description{"Country"}));
 };
 
-struct Company
-{
-    std::string name;
-    std::map<std::string, Address> offices;
-    std::vector<std::map<std::string, int>> departments;
+struct Company {
+  std::string name;
+  std::map<std::string, Address> offices;
+  std::vector<std::map<std::string, int>> departments;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Company::name>("name", "Company name"),
-                        meta::Field<&Company::offices>("offices", "Office locations"),
-                        meta::Field<&Company::departments>("departments", "Department budgets"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Company::name>("name", Description{"Company name"}),
+      field<&Company::offices>("offices", Description{"Office locations"}),
+      field<&Company::departments>("departments",
+                                       Description{"Department budgets"}));
 };
 
-void testComplexNesting()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 6: Complex Nested Structure\n";
-    std::cout << "============================================================\n";
+void testComplexNesting() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 6: Complex Nested Structure\n";
+  std::cout << "============================================================\n";
 
-    Company company{"TechCorp",
-                    {{"US", {"New York", "USA"}}, {"EU", {"Berlin", "Germany"}}},
-                    {{{"Engineering", 100}, {"Sales", 50}}, {{"HR", 20}, {"Finance", 30}}}};
+  Company company{
+      "TechCorp",
+      {{"US", {"New York", "USA"}}, {"EU", {"Berlin", "Germany"}}},
+      {{{"Engineering", 100}, {"Sales", 50}}, {{"HR", 20}, {"Finance", 30}}}};
 
-    std::string yaml = meta::toYaml(company);
-    std::string json = meta::toJson(company);
+  std::string yaml = meta::toYaml(company);
+  std::string json = meta::toJson(company);
 
-    bool yaml_ok =
-        (yaml.find("TechCorp") != std::string::npos && yaml.find("New York") != std::string::npos &&
-         yaml.find("Engineering") != std::string::npos);
+  bool yaml_ok = (yaml.find("TechCorp") != std::string::npos &&
+                  yaml.find("New York") != std::string::npos &&
+                  yaml.find("Engineering") != std::string::npos);
 
-    reportTest("Complex nested structure YAML",
-               yaml_ok,
-               "name: TechCorp\\noffices:\\n  US:\\n    city: New York",
-               yaml);
+  reportTest("Complex nested structure YAML", yaml_ok,
+             "name: TechCorp\\noffices:\\n  US:\\n    city: New York", yaml);
 
-    bool json_ok =
-        (json.find("TechCorp") != std::string::npos && json.find("New York") != std::string::npos);
+  bool json_ok = (json.find("TechCorp") != std::string::npos &&
+                  json.find("New York") != std::string::npos);
 
-    reportTest("Complex nested structure JSON",
-               json_ok,
-               "{\"name\":\"TechCorp\",\"offices\":{\"US\":{...}},...}",
-               json);
+  reportTest("Complex nested structure JSON", json_ok,
+             "{\"name\":\"TechCorp\",\"offices\":{\"US\":{...}},...}", json);
 }
 
 // ============================================================================
 // TEST 7: Pairs (tuples of 2)
 // ============================================================================
 
-struct PairData
-{
-    std::vector<std::pair<std::string, int>> items;
-    std::map<std::string, std::pair<double, double>> coordinates;
+struct PairData {
+  std::vector<std::pair<std::string, int>> items;
+  std::map<std::string, std::pair<double, double>> coordinates;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&PairData::items>("items", "Key-value pairs"),
-                        meta::Field<&PairData::coordinates>("coordinates", "2D coordinates"));
+  static constexpr auto fields = std::make_tuple(
+      field<&PairData::items>("items", Description{"Key-value pairs"}),
+      field<&PairData::coordinates>("coordinates",
+                                        Description{"2D coordinates"}));
 };
 
-void testPairs()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 7: Pairs (2-element tuples)\n";
-    std::cout << "============================================================\n";
+void testPairs() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 7: Pairs (2-element tuples)\n";
+  std::cout << "============================================================\n";
 
-    PairData pairs{{{"apple", 5}, {"banana", 3}, {"cherry", 8}},
-                   {{"point1", {10.5, 20.3}}, {"point2", {15.2, 25.7}}}};
+  PairData pairs{{{"apple", 5}, {"banana", 3}, {"cherry", 8}},
+                 {{"point1", {10.5, 20.3}}, {"point2", {15.2, 25.7}}}};
 
-    std::string yaml = meta::toYaml(pairs);
-    std::string json = meta::toJson(pairs);
+  std::string yaml = meta::toYaml(pairs);
+  std::string json = meta::toJson(pairs);
 
-    bool yaml_items_ok =
-        (yaml.find("apple") != std::string::npos && yaml.find("5") != std::string::npos);
+  bool yaml_items_ok = (yaml.find("apple") != std::string::npos &&
+                        yaml.find("5") != std::string::npos);
 
-    reportTest("Pair serialization YAML - items",
-               yaml_items_ok,
-               "items:\\n  - [apple, 5]\\n  - [banana, 3]",
-               yaml);
+  reportTest("Pair serialization YAML - items", yaml_items_ok,
+             "items:\\n  - [apple, 5]\\n  - [banana, 3]", yaml);
 
-    bool yaml_coords_ok =
-        (yaml.find("point1") != std::string::npos && yaml.find("10.5") != std::string::npos);
+  bool yaml_coords_ok = (yaml.find("point1") != std::string::npos &&
+                         yaml.find("10.5") != std::string::npos);
 
-    reportTest("Pair serialization YAML - coordinates",
-               yaml_coords_ok,
-               "coordinates:\\n  point1: [10.5, 20.3]",
-               yaml);
+  reportTest("Pair serialization YAML - coordinates", yaml_coords_ok,
+             "coordinates:\\n  point1: [10.5, 20.3]", yaml);
 
-    bool json_items_ok =
-        (json.find("apple") != std::string::npos && json.find("[") != std::string::npos);
+  bool json_items_ok = (json.find("apple") != std::string::npos &&
+                        json.find("[") != std::string::npos);
 
-    reportTest(
-        "Pair serialization JSON - items", json_items_ok, "[[\"apple\",5],[\"banana\",3]]", json);
+  reportTest("Pair serialization JSON - items", json_items_ok,
+             "[[\"apple\",5],[\"banana\",3]]", json);
 
-    bool json_coords_ok =
-        (json.find("point1") != std::string::npos && json.find("[10.5") != std::string::npos);
+  bool json_coords_ok = (json.find("point1") != std::string::npos &&
+                         json.find("[10.5") != std::string::npos);
 
-    reportTest(
-        "Pair serialization JSON - coordinates", json_coords_ok, "{\"point1\":[10.5,20.3]}", json);
+  reportTest("Pair serialization JSON - coordinates", json_coords_ok,
+             "{\"point1\":[10.5,20.3]}", json);
 }
 
 // ============================================================================
 // TEST 8: Tuples (variadic)
 // ============================================================================
 
-struct TupleData
-{
-    std::tuple<int, double, std::string> triple;
-    std::vector<std::tuple<std::string, int, bool>> records;
-    std::map<std::string, std::tuple<int, int, int>> versions;
+struct TupleData {
+  std::tuple<int, double, std::string> triple;
+  std::vector<std::tuple<std::string, int, bool>> records;
+  std::map<std::string, std::tuple<int, int, int>> versions;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&TupleData::triple>("triple", "3-element tuple"),
-                        meta::Field<&TupleData::records>("records", "Vector of 3-tuples"),
-                        meta::Field<&TupleData::versions>("versions", "Map to 3-tuples"));
+  static constexpr auto fields = std::make_tuple(
+      field<&TupleData::triple>("triple", Description{"3-element tuple"}),
+      field<&TupleData::records>("records",
+                                     Description{"Vector of 3-tuples"}),
+      field<&TupleData::versions>("versions",
+                                      Description{"Map to 3-tuples"}));
 };
 
-void testTuples()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 8: Tuples (variadic)\n";
-    std::cout << "============================================================\n";
+void testTuples() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 8: Tuples (variadic)\n";
+  std::cout << "============================================================\n";
 
-    TupleData tuples{{42, 3.14, "hello"},
-                     {{"record1", 100, true}, {"record2", 200, false}},
-                     {{"v1.0", {1, 0, 0}}, {"v2.1", {2, 1, 0}}}};
+  TupleData tuples{{42, 3.14, "hello"},
+                   {{"record1", 100, true}, {"record2", 200, false}},
+                   {{"v1.0", {1, 0, 0}}, {"v2.1", {2, 1, 0}}}};
 
-    std::string yaml = meta::toYaml(tuples);
-    std::string json = meta::toJson(tuples);
+  std::string yaml = meta::toYaml(tuples);
+  std::string json = meta::toJson(tuples);
 
-    bool yaml_triple_ok =
-        (yaml.find("triple") != std::string::npos && yaml.find("42") != std::string::npos &&
-         yaml.find("hello") != std::string::npos);
+  bool yaml_triple_ok = (yaml.find("triple") != std::string::npos &&
+                         yaml.find("42") != std::string::npos &&
+                         yaml.find("hello") != std::string::npos);
 
-    reportTest(
-        "Tuple serialization YAML - triple", yaml_triple_ok, "triple: [42, 3.14, hello]", yaml);
+  reportTest("Tuple serialization YAML - triple", yaml_triple_ok,
+             "triple: [42, 3.14, hello]", yaml);
 
-    bool yaml_records_ok =
-        (yaml.find("record1") != std::string::npos && yaml.find("100") != std::string::npos &&
-         yaml.find("true") != std::string::npos);
+  bool yaml_records_ok = (yaml.find("record1") != std::string::npos &&
+                          yaml.find("100") != std::string::npos &&
+                          yaml.find("true") != std::string::npos);
 
-    reportTest("Tuple serialization YAML - vector of tuples",
-               yaml_records_ok,
-               "records:\\n  - [record1, 100, true]",
-               yaml);
+  reportTest("Tuple serialization YAML - vector of tuples", yaml_records_ok,
+             "records:\\n  - [record1, 100, true]", yaml);
 
-    bool yaml_versions_ok =
-        (yaml.find("v1.0") != std::string::npos && yaml.find("[1, 0, 0]") != std::string::npos);
+  bool yaml_versions_ok = (yaml.find("v1.0") != std::string::npos &&
+                           yaml.find("[1, 0, 0]") != std::string::npos);
 
-    reportTest("Tuple serialization YAML - map to tuples",
-               yaml_versions_ok,
-               "versions:\\n  v1.0: [1, 0, 0]",
-               yaml);
+  reportTest("Tuple serialization YAML - map to tuples", yaml_versions_ok,
+             "versions:\\n  v1.0: [1, 0, 0]", yaml);
 
-    bool json_triple_ok =
-        (json.find("[42") != std::string::npos && json.find("hello") != std::string::npos);
+  bool json_triple_ok = (json.find("[42") != std::string::npos &&
+                         json.find("hello") != std::string::npos);
 
-    reportTest("Tuple serialization JSON - triple", json_triple_ok, "[42,3.14,\"hello\"]", json);
+  reportTest("Tuple serialization JSON - triple", json_triple_ok,
+             "[42,3.14,\"hello\"]", json);
 
-    bool json_records_ok = (json.find("record1") != std::string::npos &&
-                            json.find("[\"record1\",100,true]") != std::string::npos);
+  bool json_records_ok =
+      (json.find("record1") != std::string::npos &&
+       json.find("[\"record1\",100,true]") != std::string::npos);
 
-    reportTest("Tuple serialization JSON - vector of tuples",
-               json_records_ok,
-               "[[\"record1\",100,true]",
-               json);
+  reportTest("Tuple serialization JSON - vector of tuples", json_records_ok,
+             "[[\"record1\",100,true]", json);
 
-    bool json_versions_ok =
-        (json.find("v1.0") != std::string::npos && json.find("[1,0,0]") != std::string::npos);
+  bool json_versions_ok = (json.find("v1.0") != std::string::npos &&
+                           json.find("[1,0,0]") != std::string::npos);
 
-    reportTest(
-        "Tuple serialization JSON - map to tuples", json_versions_ok, "{\"v1.0\":[1,0,0]}", json);
+  reportTest("Tuple serialization JSON - map to tuples", json_versions_ok,
+             "{\"v1.0\":[1,0,0]}", json);
 }
 
 // ============================================================================
 // TEST 9: Pair Deserialization
 // ============================================================================
 
-void testPairDeserialization()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 9: Pair Deserialization\n";
-    std::cout << "============================================================\n";
+void testPairDeserialization() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 9: Pair Deserialization\n";
+  std::cout << "============================================================\n";
 
-    std::string yaml_str = R"(
+  std::string yaml_str = R"(
 items:
   - [apple, 5]
   - [banana, 3]
@@ -450,62 +430,60 @@ coordinates:
   point2: [15.0, 25.0]
 )";
 
-    YAML::Node node = YAML::Load(yaml_str);
-    auto [data, result] = meta::reifyFromYaml<PairData>(node);
+  YAML::Node node = YAML::Load(yaml_str);
+  auto [data, result] = meta::reifyFromYaml<PairData>(node);
 
-    bool deser_ok = result.valid;
-    reportTest("Pair deserialization from YAML",
-               deser_ok,
-               "valid=true, items.size()=2, coordinates.size()=2",
-               result.valid ? "PASS"
-                            : ("FAIL: " + (result.errors.empty() ? "unknown error"
-                                                                 : result.errors.begin()->second)));
+  bool deser_ok = result.valid;
+  reportTest("Pair deserialization from YAML", deser_ok,
+             "valid=true, items.size()=2, coordinates.size()=2",
+             result.valid ? "PASS"
+                          : ("FAIL: " + (result.errors.empty()
+                                             ? "unknown error"
+                                             : result.errors.begin()->second)));
 
-    if (!result.valid)
-    {
-        std::cout << "   Detailed errors:\n";
-        for (const auto& [field, err] : result.errors)
-        {
-            std::cout << "     " << field << ": " << err << "\n";
-        }
+  if (!result.valid) {
+    std::cout << "   Detailed errors:\n";
+    for (const auto &[field, err] : result.errors) {
+      std::cout << "     " << field << ": " << err << "\n";
     }
+  }
 
-    if (result.valid && data)
-    {
-        bool items_ok = (data->items.size() == 2 && data->items[0].first == "apple" &&
-                         data->items[0].second == 5);
-        reportTest("Pair deserialization - items content",
-                   items_ok,
-                   "apple=5, banana=3",
-                   items_ok ? "PASS"
-                            : ("FAIL: size=" + std::to_string(data->items.size()) + ", first=[" +
-                               data->items[0].first + "," + std::to_string(data->items[0].second) +
-                               "]"));
+  if (result.valid && data) {
+    bool items_ok =
+        (data->items.size() == 2 && data->items[0].first == "apple" &&
+         data->items[0].second == 5);
+    reportTest("Pair deserialization - items content", items_ok,
+               "apple=5, banana=3",
+               items_ok ? "PASS"
+                        : ("FAIL: size=" + std::to_string(data->items.size()) +
+                           ", first=[" + data->items[0].first + "," +
+                           std::to_string(data->items[0].second) + "]"));
 
-        bool coords_ok = (data->coordinates.size() == 2 && data->coordinates.count("point1") > 0);
-        reportTest("Pair deserialization - coordinates content",
-                   coords_ok,
-                   "point1 exists with values 10.5, 20.3",
-                   coords_ok ? "PASS" : ("FAIL: size=" + std::to_string(data->coordinates.size())));
-    }
-    else
-    {
-        reportTest("Pair deserialization - items content", false, "apple=5", "N/A");
-        reportTest("Pair deserialization - coordinates content", false, "point1 exists", "N/A");
-    }
+    bool coords_ok = (data->coordinates.size() == 2 &&
+                      data->coordinates.count("point1") > 0);
+    reportTest(
+        "Pair deserialization - coordinates content", coords_ok,
+        "point1 exists with values 10.5, 20.3",
+        coords_ok ? "PASS"
+                  : ("FAIL: size=" + std::to_string(data->coordinates.size())));
+  } else {
+    reportTest("Pair deserialization - items content", false, "apple=5", "N/A");
+    reportTest("Pair deserialization - coordinates content", false,
+               "point1 exists", "N/A");
+  }
 }
 
 // ============================================================================
 // TEST 10: Tuple Deserialization
 // ============================================================================
 
-void testTupleDeserialization()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 10: Tuple Deserialization\n";
-    std::cout << "============================================================\n";
+void testTupleDeserialization() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 10: Tuple Deserialization\n";
+  std::cout << "============================================================\n";
 
-    std::string yaml_str = R"(
+  std::string yaml_str = R"(
 triple: [42, 3.14, hello]
 records:
   - [record1, 100, true]
@@ -515,115 +493,100 @@ versions:
   v2.1: [2, 1, 0]
 )";
 
-    YAML::Node node = YAML::Load(yaml_str);
-    auto [data, result] = meta::reifyFromYaml<TupleData>(node);
+  YAML::Node node = YAML::Load(yaml_str);
+  auto [data, result] = meta::reifyFromYaml<TupleData>(node);
 
-    bool deser_ok = result.valid;
-    reportTest("Tuple deserialization from YAML",
-               deser_ok,
-               "valid=true, triple=(42,3.14,hello)",
-               result.valid ? "PASS"
-                            : ("FAIL: " + (result.errors.empty() ? "unknown error"
-                                                                 : result.errors.begin()->second)));
+  bool deser_ok = result.valid;
+  reportTest("Tuple deserialization from YAML", deser_ok,
+             "valid=true, triple=(42,3.14,hello)",
+             result.valid ? "PASS"
+                          : ("FAIL: " + (result.errors.empty()
+                                             ? "unknown error"
+                                             : result.errors.begin()->second)));
 
-    if (!result.valid)
-    {
-        std::cout << "   Detailed errors:\n";
-        for (const auto& [field, err] : result.errors)
-        {
-            std::cout << "     " << field << ": " << err << "\n";
-        }
+  if (!result.valid) {
+    std::cout << "   Detailed errors:\n";
+    for (const auto &[field, err] : result.errors) {
+      std::cout << "     " << field << ": " << err << "\n";
     }
+  }
 
-    if (result.valid && data)
-    {
-        bool triple_ok = (std::get<0>(data->triple) == 42 && std::get<2>(data->triple) == "hello");
-        reportTest("Tuple deserialization - triple content",
-                   triple_ok,
-                   "tuple=(42, 3.14, hello)",
-                   triple_ok ? "PASS" : "FAIL");
+  if (result.valid && data) {
+    bool triple_ok = (std::get<0>(data->triple) == 42 &&
+                      std::get<2>(data->triple) == "hello");
+    reportTest("Tuple deserialization - triple content", triple_ok,
+               "tuple=(42, 3.14, hello)", triple_ok ? "PASS" : "FAIL");
 
-        bool records_ok =
-            (data->records.size() == 2 && std::get<0>(data->records[0]) == "record1" &&
-             std::get<1>(data->records[0]) == 100);
-        reportTest("Tuple deserialization - vector of tuples",
-                   records_ok,
-                   "records[0]=(record1, 100, true)",
-                   records_ok ? "PASS" : ("FAIL: size=" + std::to_string(data->records.size())));
+    bool records_ok = (data->records.size() == 2 &&
+                       std::get<0>(data->records[0]) == "record1" &&
+                       std::get<1>(data->records[0]) == 100);
+    reportTest("Tuple deserialization - vector of tuples", records_ok,
+               "records[0]=(record1, 100, true)",
+               records_ok
+                   ? "PASS"
+                   : ("FAIL: size=" + std::to_string(data->records.size())));
 
-        bool versions_ok =
-            (data->versions.count("v1.0") > 0 && std::get<0>(data->versions["v1.0"]) == 1);
-        reportTest("Tuple deserialization - map to tuples",
-                   versions_ok,
-                   "versions[v1.0]=(1, 0, 0)",
-                   versions_ok ? "PASS" : "FAIL");
-    }
-    else
-    {
-        reportTest("Tuple deserialization - triple content", false, "(42,3.14,hello)", "N/A");
-        reportTest("Tuple deserialization - vector of tuples",
-                   false,
-                   "records[0]=(record1,100,true)",
-                   "N/A");
-        reportTest("Tuple deserialization - map to tuples", false, "versions[v1.0]=(1,0,0)", "N/A");
-    }
+    bool versions_ok = (data->versions.count("v1.0") > 0 &&
+                        std::get<0>(data->versions["v1.0"]) == 1);
+    reportTest("Tuple deserialization - map to tuples", versions_ok,
+               "versions[v1.0]=(1, 0, 0)", versions_ok ? "PASS" : "FAIL");
+  } else {
+    reportTest("Tuple deserialization - triple content", false,
+               "(42,3.14,hello)", "N/A");
+    reportTest("Tuple deserialization - vector of tuples", false,
+               "records[0]=(record1,100,true)", "N/A");
+    reportTest("Tuple deserialization - map to tuples", false,
+               "versions[v1.0]=(1,0,0)", "N/A");
+  }
 }
 
 // ============================================================================
 // MAIN TEST RUNNER
 // ============================================================================
 
-int main()
-{
-    std::cout << "\n" << std::string(60, '=') << "\n";
-    std::cout << "META FRAMEWORK - COMPREHENSIVE TEST SUITE\n";
-    std::cout << std::string(60, '=') << "\n";
+int main() {
+  std::cout << "\n" << std::string(60, '=') << "\n";
+  std::cout << "META FRAMEWORK - COMPREHENSIVE TEST SUITE\n";
+  std::cout << std::string(60, '=') << "\n";
 
-    testMapOfStructs();
-    testMapOfVectors();
-    testVectorOfMaps();
-    testNestedMaps();
-    testVectorOfStructs();
-    testComplexNesting();
-    testPairs();
-    testTuples();
-    testPairDeserialization();
-    testTupleDeserialization();
+  testMapOfStructs();
+  testMapOfVectors();
+  testVectorOfMaps();
+  testNestedMaps();
+  testVectorOfStructs();
+  testComplexNesting();
+  testPairs();
+  testTuples();
+  testPairDeserialization();
+  testTupleDeserialization();
 
-    // Print summary
-    std::cout << "\n" << std::string(60, '=') << "\n";
-    std::cout << "TEST SUMMARY\n";
-    std::cout << std::string(60, '=') << "\n";
+  // Print summary
+  std::cout << "\n" << std::string(60, '=') << "\n";
+  std::cout << "TEST SUMMARY\n";
+  std::cout << std::string(60, '=') << "\n";
 
-    int passed = 0;
-    int failed = 0;
+  int passed = 0;
+  int failed = 0;
 
-    for (const auto& result : results)
-    {
-        if (result.passed)
-        {
-            passed++;
-        }
-        else
-        {
-            failed++;
-        }
+  for (const auto &result : results) {
+    if (result.passed) {
+      passed++;
+    } else {
+      failed++;
     }
+  }
 
-    std::cout << "Total: " << results.size() << " tests\n";
-    std::cout << "Passed: " << passed << "\n";
-    std::cout << "Failed: " << failed << "\n";
+  std::cout << "Total: " << results.size() << " tests\n";
+  std::cout << "Passed: " << passed << "\n";
+  std::cout << "Failed: " << failed << "\n";
 
-    if (failed == 0)
-    {
-        std::cout << "\nALL TESTS PASSED!\n";
-    }
-    else
-    {
-        std::cout << "\n" << failed << " test(s) failed\n";
-    }
+  if (failed == 0) {
+    std::cout << "\nALL TESTS PASSED!\n";
+  } else {
+    std::cout << "\n" << failed << " test(s) failed\n";
+  }
 
-    std::cout << std::string(60, '=') << "\n";
+  std::cout << std::string(60, '=') << "\n";
 
-    return failed > 0 ? 1 : 0;
+  return failed > 0 ? 1 : 0;
 }

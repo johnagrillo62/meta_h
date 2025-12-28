@@ -9,42 +9,40 @@
 
 #include "meta.h"
 
+using namespace meta;
 // Simple struct with fields
-struct Person
-{
-    std::string name;
-    int age;
-    bool active;
+struct Person {
+  std::string name;
+  int age;
+  bool active;
 
-    // Define fields as tuple
-    static constexpr auto fields =
-        std::tuple{meta::Field<&Person::name>("name", "Person's name"),
-                   meta::Field<&Person::age>("age", "Person's age"),
-                   meta::Field<&Person::active>("active", "Is person active")};
+  // Define fields as tuple
+  static constexpr auto fields = std::tuple(
+      field<&Person::name>("name", Description{"Person's name"}),
+      field<&Person::age>("age", Description{"Person's age"}),
+      field<&Person::active>("active", Description{"Is person active"}));
 };
 
-int main()
-{
-    // Create YAML
-    YAML::Node yaml = YAML::Load(R"(
+int main() {
+  // Create YAML
+  YAML::Node yaml = YAML::Load(R"(
     name: Alice
     age: 30
     active: true
   )");
 
-    // Parse from YAML
+  // Parse from YAML
 
-    auto [person, result] = meta::reifyFromYaml<Person>(yaml);
+  auto [person, result] = meta::reifyFromYaml<Person>(yaml);
 
-    if (person)
-    {
-        std::cout << "=== toString ===\n" << meta::toString(*person) << "\n";
-        std::cout << "=== toJson ===\n" << meta::toJson(*person) << "\n";
+  if (person) {
+    std::cout << "=== toString ===\n" << meta::toString(*person) << "\n";
+    std::cout << "=== toJson ===\n" << meta::toJson(*person) << "\n";
 
-        auto yaml = meta::toYaml(*person);
-        std::cout << "=== toYaml ===\n";
-        std::cout << yaml << "\n";
-    }
+    auto yaml = meta::toYaml(*person);
+    std::cout << "=== toYaml ===\n";
+    std::cout << yaml << "\n";
+  }
 
-    return 0;
+  return 0;
 }

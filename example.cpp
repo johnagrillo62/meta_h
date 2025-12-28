@@ -5,20 +5,15 @@
  * the capabilities and features of the meta.h C++20 serialization framework.
  */
 
-#include <iostream>
-
 #include "meta.h"
+#include <iostream>
+using namespace meta;
 
 // ============================================================================
 // ENUM 1: Environment
 // ============================================================================
 // Step 1: Define the enum
-enum class Environment
-{
-    Development,
-    Staging,
-    Production
-};
+enum class Environment { Development, Staging, Production };
 
 // Step 2: Create mapping array
 constexpr std::array EnvironmentMapping = std::array{
@@ -31,14 +26,7 @@ constexpr std::array EnvironmentMapping = std::array{
 // ENUM 2: LogLevel
 // ============================================================================
 // Step 1: Define the enum
-enum class LogLevel
-{
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Critical
-};
+enum class LogLevel { Debug, Info, Warning, Error, Critical };
 
 // Step 2: Create mapping array
 constexpr std::array LogLevelMapping = std::array{
@@ -53,12 +41,7 @@ constexpr std::array LogLevelMapping = std::array{
 // ENUM 3: Status
 // ============================================================================
 // Step 1: Define the enum
-enum class Status
-{
-    Active,
-    Inactive,
-    Maintenance
-};
+enum class Status { Active, Inactive, Maintenance };
 
 // Step 2: Create mapping array
 constexpr std::array StatusMapping = std::array{
@@ -71,138 +54,136 @@ constexpr std::array StatusMapping = std::array{
 // STEP 3: DEFINE STRUCTS
 // ============================================================================
 
-struct DatabaseConfig
-{
-    std::string host;
-    int port;
-    bool ssl_enabled;
+struct DatabaseConfig {
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&DatabaseConfig::host>{"host", "Database host"},
-                        meta::Field<&DatabaseConfig::port>{"port", "Database port"},
-                        meta::Field<&DatabaseConfig::ssl_enabled>{"ssl_enabled", "Enable SSL"});
+  std::string host;
+  int port;
+  bool ssl_enabled;
+
+  static constexpr auto fields = std::make_tuple(
+      field<&DatabaseConfig::host>("host", Description{"Database host"}),
+      field<&DatabaseConfig::port>("port", Description{"Database port"}),
+      field<&DatabaseConfig::ssl_enabled>("ssl_enabled",
+                                              Description{"Enable SSL"}));
 };
 
-struct AppConfig
-{
-    std::string app_name;
-    Environment environment;
-    LogLevel log_level;
-    DatabaseConfig database;
-    std::vector<std::string> features;
-    std::optional<std::string> description;
-    std::map<std::string, int> metrics;
-    std::vector<Status> statuses;
+struct AppConfig {
+  std::string app_name;
+  Environment environment;
+  LogLevel log_level;
+  DatabaseConfig database;
+  std::vector<std::string> features;
+  std::optional<std::string> description;
+  std::map<std::string, int> metrics;
+  std::vector<Status> statuses;
 
-    static constexpr auto fields = std::make_tuple(
-        meta::Field<&AppConfig::app_name>{"app_name", "Application name"},
-        meta::Field<&AppConfig::environment>{"environment", "Deployment environment"},
-        meta::Field<&AppConfig::log_level>{"log_level", "Logging level"},
-        meta::Field<&AppConfig::database>{"database", "Database configuration"},
-        meta::Field<&AppConfig::features>{"features", "Available features"},
-        meta::Field<&AppConfig::description>{"description", "App description", meta::OptionalField},
-        meta::Field<&AppConfig::metrics>{"metrics", "Performance metrics"},
-        meta::Field<&AppConfig::statuses>{"statuses", "Component statuses"});
+  static constexpr auto fields = std::make_tuple(
+      field<&AppConfig::app_name>("app_name",
+                                      Description{"Application name"}),
+      field<&AppConfig::environment>("environment",
+                                         Description{"Deployment environment"}),
+      field<&AppConfig::log_level>("log_level",
+                                       Description{"Logging level"}),
+      field<&AppConfig::database>("database",
+                                      Description{"Database configuration"}),
+      field<&AppConfig::features>("features",
+                                      Description{"Available features"}),
+      field<&AppConfig::description>(
+          "description", Description{"App description"}),
+      field<&AppConfig::metrics>("metrics",
+                                     Description{"Performance metrics"}),
+      field<&AppConfig::statuses>("statuses",
+                                      Description{"Component statuses"}));
 };
 
 // ============================================================================
 // DATA STRUCT FOR CONTAINERS EXAMPLE
 // ============================================================================
 
-struct Data
-{
-    std::vector<int> numbers;
-    std::map<std::string, int> scores;
-    std::optional<std::string> note;
+struct Data {
+  std::vector<int> numbers;
+  std::map<std::string, int> scores;
+  std::optional<std::string> note;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Data::numbers>{"numbers", "Numbers"},
-                        meta::Field<&Data::scores>{"scores", "Scores"},
-                        meta::Field<&Data::note>{"note", "Optional note", meta::OptionalField});
+  static constexpr auto fields = std::make_tuple(
+      field<&Data::numbers>("numbers", Description{"Numbers"}),
+      field<&Data::scores>("scores", Description{"Scores"}),
+      field<&Data::note>("note", Description{"Optional note"}));
 };
 
 // ============================================================================
 // STEP 4: REGISTER ENUMS WITH META FRAMEWORK (Global Namespace)
 // ============================================================================
 
-template <> struct meta::EnumMapping<Environment>
-{
-    static constexpr auto& mapping = EnvironmentMapping;
-    using Type = meta::EnumTraitsAuto<Environment, EnvironmentMapping>;
+template <> struct meta::EnumMapping<Environment> {
+  static constexpr auto &mapping = EnvironmentMapping;
+  using Type = meta::EnumTraitsAuto<Environment, EnvironmentMapping>;
 };
 
-template <> struct meta::EnumMapping<LogLevel>
-{
-    static constexpr auto& mapping = LogLevelMapping;
-    using Type = meta::EnumTraitsAuto<LogLevel, LogLevelMapping>;
+template <> struct meta::EnumMapping<LogLevel> {
+  static constexpr auto &mapping = LogLevelMapping;
+  using Type = meta::EnumTraitsAuto<LogLevel, LogLevelMapping>;
 };
 
-template <> struct meta::EnumMapping<Status>
-{
-    static constexpr auto& mapping = StatusMapping;
-    using Type = meta::EnumTraitsAuto<Status, StatusMapping>;
+template <> struct meta::EnumMapping<Status> {
+  static constexpr auto &mapping = StatusMapping;
+  using Type = meta::EnumTraitsAuto<Status, StatusMapping>;
 };
 
 // ============================================================================
 // EXAMPLES
 // ============================================================================
 
-void exampleEnums()
-{
-    std::cout << "\n=== ENUMS ===\n";
+void exampleEnums() {
+  std::cout << "\n=== ENUMS ===\n";
 
-    Environment env = Environment::Production;
-    std::cout << "Environment: " << env << "\n";
+  Environment env = Environment::Production;
+  std::cout << "Environment: " << env << "\n";
 
-    auto parsed = meta::toEnum<Environment>("staging");
-    if (parsed)
-    {
-        std::cout << "Parsed: " << *parsed << "\n";
-    }
+  auto parsed = meta::toEnum<Environment>("staging");
+  if (parsed) {
+    std::cout << "Parsed: " << *parsed << "\n";
+  }
 
-    std::cout << "Valid values: ";
-    for (const auto& val : meta::enumValues<LogLevel>())
-    {
-        std::cout << val << " ";
-    }
-    std::cout << "\n";
+  std::cout << "Valid values: ";
+  for (const auto &val : meta::enumValues<LogLevel>()) {
+    std::cout << val << " ";
+  }
+  std::cout << "\n";
 }
 
-void exampleSerialization()
-{
-    std::cout << "\n=== SERIALIZATION ===\n";
+void exampleSerialization() {
+  std::cout << "\n=== SERIALIZATION ===\n";
 
-    AppConfig cfg{"MyApp",
-                  Environment::Production,
-                  LogLevel::Info,
-                  {"localhost", 5432, true},
-                  {"auth", "cache", "logging"},
-                  "Production config",
-                  {{"requests", 1000}, {"errors", 5}},
-                  {Status::Active, Status::Inactive}};
+  AppConfig cfg{"MyApp",
+                Environment::Production,
+                LogLevel::Info,
+                {"localhost", 5432, true},
+                {"auth", "cache", "logging"},
+                "Production config",
+                {{"requests", 1000}, {"errors", 5}},
+                {Status::Active, Status::Inactive}};
 
-    std::cout << "\nYAML:\n" << meta::toYaml(cfg);
-    std::cout << "\nJSON: " << meta::toJson(cfg) << "\n";
-    std::cout << "\nFormatted:\n" << meta::toString(cfg);
+  std::cout << "\nYAML:\n" << meta::toYaml(cfg);
+  std::cout << "\nJSON: " << meta::toJson(cfg) << "\n";
+  std::cout << "\nFormatted:\n" << meta::toString(cfg);
 }
 
-void exampleContainers()
-{
-    std::cout << "\n=== CONTAINERS ===\n";
+void exampleContainers() {
+  std::cout << "\n=== CONTAINERS ===\n";
 
-    Data data{{1, 2, 3}, {{"alice", 100}, {"bob", 95}}, "Important"};
+  Data data{{1, 2, 3}, {{"alice", 100}, {"bob", 95}}, "Important"};
 
-    std::cout << "YAML:\n" << meta::toYaml(data);
-    std::cout << "\nJSON: " << meta::toJson(data) << "\n";
+  std::cout << "YAML:\n" << meta::toYaml(data);
+  std::cout << "\nJSON: " << meta::toJson(data) << "\n";
 }
 
-void exampleDeserialization()
-{
-    std::cout << "\n=== DESERIALIZATION (Testing IsMap Fix) ===\n";
+void exampleDeserialization() {
+  std::cout << "\n=== DESERIALIZATION (Testing IsMap Fix) ===\n";
 
-    // Create YAML with nested config (includes std::map which needs IsMap
-    // handler)
-    std::string yaml_str = R"(
+  // Create YAML with nested config (includes std::map which needs IsMap
+  // handler)
+  std::string yaml_str = R"(
 app_name: MyApp
 environment: prod
 log_level: info
@@ -220,32 +201,30 @@ statuses:
   - active
 )";
 
-    YAML::Node node = YAML::Load(yaml_str);
-    auto [cfg, result] = meta::reifyFromYaml<AppConfig>(node);
+  YAML::Node node = YAML::Load(yaml_str);
+  auto [cfg, result] = meta::reifyFromYaml<AppConfig>(node);
 
-    if (result.valid)
-    {
-        std::cout << "Deserialization successful!\n";
-        std::cout << "App: " << cfg->app_name << "\n";
-        std::cout << "Env: " << cfg->environment << "\n";
-        std::cout << "DB Host: " << cfg->database.host << ":" << cfg->database.port << "\n";
-        std::cout << "Features: ";
-        for (const auto& f : cfg->features)
-            std::cout << f << " ";
-        std::cout << "\n";
-        std::cout << "Metrics: ";
-        for (const auto& [k, v] : cfg->metrics)
-            std::cout << k << "=" << v << " ";
-        std::cout << "\n";
-    }
-    else
-    {
-        std::cout << "❌ Deserialization failed\n";
-    }
+  if (result.valid) {
+    std::cout << "Deserialization successful!\n";
+    std::cout << "App: " << cfg->app_name << "\n";
+    std::cout << "Env: " << cfg->environment << "\n";
+    std::cout << "DB Host: " << cfg->database.host << ":" << cfg->database.port
+              << "\n";
+    std::cout << "Features: ";
+    for (const auto &f : cfg->features)
+      std::cout << f << " ";
+    std::cout << "\n";
+    std::cout << "Metrics: ";
+    for (const auto &[k, v] : cfg->metrics)
+      std::cout << k << "=" << v << " ";
+    std::cout << "\n";
+  } else {
+    std::cout << "❌ Deserialization failed\n";
+  }
 
-    // Test with invalid enum
-    std::cout << "\n=== TESTING INVALID ENUM ERROR MESSAGE ===\n";
-    std::string bad_yaml = R"(
+  // Test with invalid enum
+  std::cout << "\n=== TESTING INVALID ENUM ERROR MESSAGE ===\n";
+  std::string bad_yaml = R"(
 app_name: BadApp
 environment: invalid_value
 log_level: info
@@ -258,33 +237,31 @@ metrics: {}
 statuses: []
 )";
 
-    YAML::Node bad_node = YAML::Load(bad_yaml);
-    auto [bad_cfg, bad_result] = meta::reifyFromYaml<AppConfig>(bad_node);
+  YAML::Node bad_node = YAML::Load(bad_yaml);
+  auto [bad_cfg, bad_result] = meta::reifyFromYaml<AppConfig>(bad_node);
 
-    if (!bad_result.valid)
-    {
-        std::cout << "Expected error caught:\n";
-        for (const auto& [field, error] : bad_result.errors)
-        {
-            std::cout << field << " " << error << "\n";
-        }
+  if (!bad_result.valid) {
+    std::cout << "Expected error caught:\n";
+    for (const auto &[field, error] : bad_result.errors) {
+      std::cout << field << " " << error << "\n";
     }
+  }
 }
 
-int main()
-{
-    std::cout << "============================================================\n";
-    std::cout << "Meta Framework - Complete Examples\n";
-    std::cout << "============================================================\n";
+int main() {
+  std::cout << "============================================================\n";
+  std::cout << "Meta Framework - Complete Examples\n";
+  std::cout << "============================================================\n";
 
-    exampleEnums();
-    exampleSerialization();
-    exampleContainers();
-    exampleDeserialization();
+  exampleEnums();
+  exampleSerialization();
+  exampleContainers();
+  exampleDeserialization();
 
-    std::cout << "\n============================================================\n";
-    std::cout << "✓ All examples completed!\n";
-    std::cout << "============================================================\n";
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "✓ All examples completed!\n";
+  std::cout << "============================================================\n";
 
-    return 0;
+  return 0;
 }

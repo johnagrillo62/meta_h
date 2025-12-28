@@ -166,51 +166,6 @@ Failed: 0
 ALL TESTS PASSED!
 ============================================================
 
-====== Running bin/example_bounded ======
-
-=== Bounded Types with Validation ===
-
---- Example 1: Valid Person ---
-✓ Parsed successfully
-
-YAML:
-name: Alice Johnson
-age: 28
-score: 95
-JSON:
-{"name":"Alice Johnson","age":28,"score":95}
-
---- Example 2: Age Out of Bounds ---
-✓ Validation correctly caught error:
-  age: Value 200 out of bounds [0, 150]
-
---- Example 3: Name Too Long ---
-✓ Validation correctly caught error:
-  name: String length 107 out of bounds [1, 100]
-
---- Example 4: Valid AppConfig ---
-✓ Config parsed successfully
-
-YAML:
-hostname: api.example.com
-port: 8080
-settings:
-  debug: false
-  retries: 3
-  timeout: 30
-JSON:
-{"hostname":"api.example.com","port":8080,"settings":{"debug":"false","retries":"3","timeout":"30"}}
-
---- Example 5: Port Out of Range ---
-✓ Validation correctly caught error:
-  port: Value 99999 out of bounds [1, 65535]
-
---- Example 6: Missing Required Field ---
-✓ Validation correctly caught error:
-  score: Missing required field
-
-=== All Examples Complete ===
-
 ====== Running bin/example_complex ======
 
 
@@ -303,155 +258,6 @@ Hosts:
   prod-db-01 -> 10.0.2.5
   staging-01 -> 10.1.1.5
  All tests completed!
-
-====== Running bin/example_containers ======
-
-=== ContainersMap with Key Validation ===
-
---- Example 1: Valid AppSettings ---
-✓ Parsed successfully
-
-YAML:
-appName: MyApplication
-config:
-  debug: true
-  loglevel: INFO
-  maxConnections: 100
-  retries: 3
-  timeout: 30
-JSON:
-{"appName":"MyApplication","config":{"debug":"true","loglevel":"INFO","maxConnections":"100","retries":"3","timeout":"30"}}
-
---- Example 2: Invalid Config Key ---
-✓ Validation correctly caught error:
-  config.invalidKey: Key not in allowed set: {'timeout', 'retries', 'debug', 'loglevel', 'maxConnections'}
-
---- Example 3: Valid DatabaseConfig ---
-✓ Parsed successfully
-
-YAML:
-name: production_db
-credentials:
-  host: db.example.com
-  password: secret123
-  port: 5432
-  username: admin
-poolSize: 50
-JSON:
-{"name":"production_db","credentials":{"host":"db.example.com","password":"secret123","port":"5432","username":"admin"},"poolSize":50}
-
---- Example 4: Invalid Database Key ---
-✓ Validation correctly caught error:
-  credentials.badKey: Key not in allowed set: {'host', 'port', 'username', 'password'}
-
---- Example 5: Programmatic Insertion (Valid) ---
-✓ Valid keys inserted successfully
-  Config size: 3
-
---- Example 6: Programmatic Insertion (Invalid) ---
-✓ Validation correctly threw error:
-  Key 'unknownKey' not allowed. Valid keys: {'timeout', 'retries', 'debug', 'loglevel', 'maxConnections'}
-
---- Example 7: Partial Configuration ---
-✓ Partial config parsed successfully
-  Config size: 2 (not all keys required)
-
-YAML:
-appName: PartialApp
-config:
-  debug: true
-  timeout: 45
---- Example 8: Empty Configuration ---
-✓ Empty config parsed successfully
-  Config size: 0
-
-YAML:
-appName: EmptyApp
-config:
-  {}
---- Example 9: Serialization Roundtrip ---
-Serialized:
-appName: RoundtripApp
-config:
-  debug: false
-  retries: 10
-  timeout: 120
-✓ Roundtrip successful - deserialized object matches original
-
-=== All Examples Complete ===
-
-====== Running bin/example_containers_runtime ======
-
-=== ConstrainedMap and ConstrainedVector ===
-
---- Example 1: Valid PortConfig ---
-✓ Parsed successfully
-  Ports: 4 entries
-
-YAML:
-name: WebServer
-validPorts:
-  - 80
-  - 443
-  - 8080
-  - 8443
---- Example 2: Invalid Port (Negative) ---
-✓ Validation correctly caught error:
-  validPorts.[1]: Element constraint violated: Value -1 must be positive
-
---- Example 3: Valid UserPreferences ---
-✓ Parsed successfully
-  User: alice
-  Preferences: 4 entries
-
-YAML:
-username: alice
-preferences:
-  language: en
-  notifications: enabled
-  theme: dark
-  timezone: UTC
---- Example 4: Invalid Preference Key ---
-✓ Validation correctly caught error:
-  preferences.invalidKey: Key constraint violated: Key 'invalidKey' not in whitelist: {'theme', 'language', 'timezone', 'notifications'}
-
---- Example 5: Invalid Empty Preference Value ---
-✓ Validation correctly caught error:
-  preferences.language: Value constraint violated: String cannot be empty
-
---- Example 6: Valid StatusCodes ---
-✓ Parsed successfully
-
-YAML:
-service: AuthService
-codes:
-  error: 500
-  info: 204
-  success: 200
-  warning: 401
---- Example 7: Invalid Status Code (Zero) ---
-✓ Validation correctly caught error:
-  codes.error: Value constraint violated: Value 0 must be positive
-
---- Example 8: Programmatic Insertion (Valid) ---
-✓ Valid ports inserted
-  Total ports: 3
-
---- Example 9: Programmatic Insertion (Invalid) ---
-✓ Constraint correctly caught error:
-  Element constraint violated: Value -8080 must be positive
-
---- Example 10: Serialization Roundtrip ---
-Serialized:
-username: roundtrip_user
-preferences:
-  language: en
-  notifications: enabled
-  theme: dark
-  timezone: America/New_York
-✓ Roundtrip successful - constraints validated on deserialize
-
-=== All Examples Complete ===
 
 ====== Running bin/example_csv ======
 
@@ -896,11 +702,11 @@ datacenters:
         ports:
           - port: 80
             protocol: TCP
-            status
+            status: Online
         metadata:
           region: eu-west
     networkRanges:
-      192.168.0.0: [1, 255]
+      192.168.0.0: [1, 255, Online]
   north-america:
     name: NA-1
     servers:
@@ -908,33 +714,33 @@ datacenters:
         ports:
           - port: 80
             protocol: TCP
-            status
+            status: Online
           - port: 443
             protocol: TCP
-            status
+            status: Maintenance
         metadata:
           os: linux
       - hostname: server2
         ports:
           - port: 22
             protocol: TCP
-            status
+            status: Online
           - port: 8080
             protocol: TCP
-            status
+            status: Degraded
         metadata:
           {}
     networkRanges:
-      10.0.0.0: [1, 255]
-      10.0.1.0: [1, 255]
+      10.0.0.0: [1, 255, Online]
+      10.0.1.0: [1, 255, Degraded]
 serviceEndpoints:
-  - [api-gateway, server1]
-  - [auth-service, server2]
-  - [db-primary, eu-server1]
+  - [api-gateway, server1, Online]
+  - [auth-service, server2, Degraded]
+  - [db-primary, eu-server1, Online]
 description: Global multi-region topology
 
 Mega Complex Topology JSON:
-{"datacenters":{"europe":{"name":"EU-1","servers":[{"hostname":"eu-server1","ports":[{"port":80,"protocol":"TCP","status":}],"metadata":{"region":"eu-west"}}],"networkRanges":{"192.168.0.0":[1,255]}},"north-america":{"name":"NA-1","servers":[{"hostname":"server1","ports":[{"port":80,"protocol":"TCP","status":},{"port":443,"protocol":"TCP","status":}],"metadata":{"os":"linux"}},{"hostname":"server2","ports":[{"port":22,"protocol":"TCP","status":},{"port":8080,"protocol":"TCP","status":}],"metadata":{}}],"networkRanges":{"10.0.0.0":[1,255],"10.0.1.0":[1,255]}}},"serviceEndpoints":[["api-gateway","server1"],["auth-service","server2"],["db-primary","eu-server1"]],"description":"Global multi-region topology"}
+{"datacenters":{"europe":{"name":"EU-1","servers":[{"hostname":"eu-server1","ports":[{"port":80,"protocol":"TCP","status":"Online"}],"metadata":{"region":"eu-west"}}],"networkRanges":{"192.168.0.0":[1,255,"Online"]}},"north-america":{"name":"NA-1","servers":[{"hostname":"server1","ports":[{"port":80,"protocol":"TCP","status":"Online"},{"port":443,"protocol":"TCP","status":"Maintenance"}],"metadata":{"os":"linux"}},{"hostname":"server2","ports":[{"port":22,"protocol":"TCP","status":"Online"},{"port":8080,"protocol":"TCP","status":"Degraded"}],"metadata":{}}],"networkRanges":{"10.0.0.0":[1,255,"Online"],"10.0.1.0":[1,255,"Degraded"]}}},"serviceEndpoints":[["api-gateway","server1","Online"],["auth-service","server2","Degraded"],["db-primary","eu-server1","Online"]],"description":"Global multi-region topology"}
 
 
 ====== Running bin/example_super_super ======
@@ -942,11 +748,11 @@ Mega Complex Topology JSON:
 Generating mega topology...
 Serializing to JSON...
 MegaTopology JSON size: 292995 bytes
-Serialization took: 2.60847 ms
+Serialization took: 2.7256 ms
 JSON snippet: {"datacenters":{"Region-0":{"name":"Region-0","servers":[{"hostname":"server-0-0","ports":[{"port":80,"protocol":"TCP","status":"open"},{"port":81,"protocol":"TCP","status":"open"},{"port":82,"protoco...
 
 Serializing to YAML...
-YAML serialization took: 119.717 ms
+YAML serialization took: 131.756 ms
 YAML snippet:
 datacenters:
   Region-0:
@@ -1071,52 +877,21 @@ Deserialization succeeded
    [2]: [record3, 300, true]
 All values correct!
 
-====== Running bin/example_white_vector ======
+====== Running bin/example_white_attributes ======
 
-╔════════════════════════════════════════════════════════════╗
-║         WhitelistVector Integrated with meta.h             ║
-╚════════════════════════════════════════════════════════════╝
+Valid config parsed!
+environment: prod
+port: 443
+version: 2
 
---- Example 1: Valid Configuration ---
-✓ Parsed successfully
-  Name: MyApp
-  Environments: dev, staging, prod
-  Log Levels: debug, info, error
+Invalid environment:
+  environment: Value not in whitelist: {dev, staging, prod}
 
-Serialized back to YAML:
-name: MyApp
-environments:
-  - dev
-  - staging
-  - prod
-log_levels:
-  - debug
-  - info
-  - error
+Invalid port:
+  port: Value not in whitelist: {80, 443, 8080, 8443}
 
---- Example 2: Invalid Environment ---
-✓ Validation correctly caught error:
-  environments.[1]: Value not in whitelist: {'dev', 'staging', 'prod'}
-
---- Example 3: Invalid Log Level ---
-✓ Validation correctly caught error:
-  log_levels.[1]: Value not in whitelist: {'debug', 'info', 'warn', 'error'}
-
---- Example 4: Programmatic Insertion (Valid) ---
-✓ Valid values inserted
-
---- Example 5: Programmatic Insertion (Invalid) ---
-✓ Constraint correctly caught error:
-  Value not in whitelist: {'dev', 'staging', 'prod'}
-
---- Example 6: Roundtrip Test (YAML -> Object -> JSON) ---
-✓ Roundtrip successful
-
-JSON output:
-{"name":"RoundtripApp","environments":["dev","staging"],"log_levels":["debug","warn"]}
-  WhitelistVector: Validation at deserialization time      
-  Compile-time whitelists, runtime validation              
-  Works with YAML, JSON, XML, CSV automatically            
+Invalid version:
+  version: Value not in whitelist: {1, 1.5, 2, 2.5}
 
 ====== Running bin/example_with_enums ======
 

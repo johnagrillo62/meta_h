@@ -11,314 +11,134 @@
 #include <string>
 
 #include "meta.h"
+#include "meta_csv.h"
 
-namespace meta
-{
-
-// ============================================================================
-// CSV BUILDER - Implements Builder interface like YamlBuilder, JsonBuilder
-// ============================================================================
-
-class CSVBuilder : public Builder
-{
-  private:
-    std::ostringstream out;
-    int mapDepth = 0;
-    bool firstInCurrentLevel = true;
-    std::vector<bool> isActualMap; // Track if each level is actual map vs struct
-
-  public:
-    void writeInt(int v) override
-    {
-        outputSeparator();
-        out << v;
-    }
-
-    void writeDouble(double v) override
-    {
-        outputSeparator();
-        out << v;
-    }
-
-    void writeBool(bool v) override
-    {
-        outputSeparator();
-        out << (v ? "true" : "false");
-    }
-
-    void writeString(const std::string& v) override
-    {
-        outputSeparator();
-        std::string escaped = v;
-        size_t pos = 0;
-        while ((pos = escaped.find('"', pos)) != std::string::npos)
-        {
-            escaped.replace(pos, 1, "\"\"");
-            pos += 2;
-        }
-        out << "\"" << escaped << "\"";
-    }
-
-    void startSeq(const std::string& elemType = "") override
-    {
-        // Sequences inline - no special handling
-    }
-
-    void endSeq() override
-    {
-    }
-
-    void startFlowSeq() override
-    {
-        out << "[";
-    }
-
-    void endFlowSeq() override
-    {
-        out << "]";
-    }
-
-    void startMap(const std::string& valueType = "") override
-    {
-        mapDepth++;
-        isActualMap.push_back(false); // Assume struct unless we see actual key=value pairs
-        firstInCurrentLevel = true;
-    }
-
-    void endMap() override
-    {
-        mapDepth--;
-        isActualMap.pop_back();
-    }
-
-    void key(const std::string& k) override
-    {
-        // If this is the first key at this level and mapDepth==1, it's a struct
-        if (mapDepth == 1)
-        {
-            if (!firstInCurrentLevel)
-                out << ",";
-            firstInCurrentLevel = false;
-        }
-        else if (mapDepth > 1)
-        {
-            // Actual map: output key=value pairs
-            isActualMap[mapDepth - 1] = true;
-            if (!firstInCurrentLevel)
-                out << ";";
-            std::string escaped = k;
-            size_t pos = 0;
-            while ((pos = escaped.find('"', pos)) != std::string::npos)
-            {
-                escaped.replace(pos, 1, "\"\"");
-                pos += 2;
-            }
-            out << "\"" << escaped << "\"=";
-            firstInCurrentLevel = false;
-        }
-    }
-
-    std::string result() override
-    {
-        return out.str();
-    }
-
-  private:
-    void outputSeparator()
-    {
-        // Separators are handled by key() for maps and by the value writing for
-        // sequences No action needed here
-    }
-};
-
-// ============================================================================
-// PUBLIC API - toCSV using the Builder pattern
-// ============================================================================
-
-template <typename T> std::string toCSV(const T& obj)
-{
-    CSVBuilder builder;
-    to(obj, &builder);
-    return builder.result();
-}
-
-// ============================================================================
-// CSV HEADER GENERATION - from fields metadata
-// ============================================================================
-
-template <typename T>
-    requires requires(T t) {
-        { T::fields };
-    }
-std::string toCSVHeader()
-{
-    std::ostringstream oss;
-    bool first = true;
-    std::apply(
-        [&](auto&&... fields)
-        {
-            (...,
-             [&](auto& field)
-             {
-                 if (!first)
-                     oss << ",";
-                 std::string escaped = std::string(field.fieldName);
-                 size_t pos = 0;
-                 while ((pos = escaped.find('"', pos)) != std::string::npos)
-                 {
-                     escaped.replace(pos, 1, "\"\"");
-                     pos += 2;
-                 }
-                 oss << "\"" << escaped << "\"";
-                 first = false;
-             }(fields));
-        },
-        T::fields);
-    return oss.str();
-}
-
-} // namespace meta
+using namespace meta;
 
 // ============================================================================
 // EXAMPLE STRUCTURES
 // ============================================================================
 
-struct Person
-{
-    std::string name;
-    int age;
-    std::string email;
-    std::vector<std::string> hobbies;
+struct Person {
+  std::string name;
+  int age;
+  std::string email;
+  std::vector<std::string> hobbies;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Person::name>("name", "Person's name"),
-                        meta::Field<&Person::age>("age", "Person's age"),
-                        meta::Field<&Person::email>("email", "Email address"),
-                        meta::Field<&Person::hobbies>("hobbies", "List of hobbies"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Person::name>("name", Description{"Person's name"}),
+      field<&Person::age>("age", Description{"Person's age"}),
+      field<&Person::email>("email", Description{"Email address"}),
+      field<&Person::hobbies>("hobbies", Description{"List of hobbies"}));
 };
 
-struct Company
-{
-    std::string name;
-    int employees;
-    double revenue;
-    std::map<std::string, int> departments;
+struct Company {
+  std::string name;
+  int employees;
+  double revenue;
+  std::map<std::string, int> departments;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Company::name>("name", "Company name"),
-                        meta::Field<&Company::employees>("employees", "Number of employees"),
-                        meta::Field<&Company::revenue>("revenue", "Annual revenue"),
-                        meta::Field<&Company::departments>("departments", "Department counts"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Company::name>("name", Description{"Company name"}),
+      field<&Company::employees>("employees",
+                                     Description{"Number of employees"}),
+      field<&Company::revenue>("revenue", Description{"Annual revenue"}),
+      field<&Company::departments>("departments",
+                                       Description{"Department counts"}));
 };
 
-struct Config
-{
-    std::string appName;
-    int timeout;
-    bool debug;
-    std::vector<int> ports;
-    std::optional<std::string> description;
+struct Config {
+  std::string appName;
+  int timeout;
+  bool debug;
+  std::vector<int> ports;
+  std::optional<std::string> description;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Config::appName>("appName", "App name"),
-                        meta::Field<&Config::timeout>("timeout", "Timeout in seconds"),
-                        meta::Field<&Config::debug>("debug", "Debug mode"),
-                        meta::Field<&Config::ports>("ports", "Listening ports"),
-                        meta::Field<&Config::description>("description", "Optional description"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Config::appName>("appName", Description{"App name"}),
+      field<&Config::timeout>("timeout", Description{"Timeout in seconds"}),
+      field<&Config::debug>("debug", Description{"Debug mode"}),
+      field<&Config::ports>("ports", Description{"Listening ports"}),
+      field<&Config::description>("description",
+                                      Description{"Optional description"}));
 };
 
 // ============================================================================
 // MAIN - Demonstrate CSV from meta.h serializer
 // ============================================================================
 
-int main()
-{
-    std::cout << "     CSV Output Using meta.h Serializer \n";
+int main() {
+  std::cout << "     CSV Output Using meta.h Serializer \n";
 
-    // ========================================
-    // Example 1: Simple Struct
-    // ========================================
-    std::cout << "--- Example 1: Simple Struct ---\n";
+  // ========================================
+  // Example 1: Simple Struct
+  // ========================================
+  std::cout << "--- Example 1: Simple Struct ---\n";
 
-    Person person{"Alice Johnson", 28, "alice@example.com", {"reading", "coding", "hiking"}};
-    std::cout << "Header: " << meta::toCSVHeader<Person>() << "\n";
-    std::cout << "Data:   " << meta::toCSV(person) << "\n\n";
+  Person person{"Alice Johnson",
+                28,
+                "alice@example.com",
+                {"reading", "coding", "hiking"}};
+  std::cout << "Header: " << meta::toCSVHeader<Person>() << "\n";
+  std::cout << "Data:   " << meta::toCSV(person) << "\n\n";
 
-    // ========================================
-    // Example 2: Multiple Simple Structs
-    // ========================================
-    std::cout << "--- Example 2: Multiple People ---\n";
+  // ========================================
+  // Example 2: Multiple Simple Structs
+  // ========================================
+  std::cout << "--- Example 2: Multiple People ---\n";
 
-    std::vector<Person> people = {
-        {"Bob Smith", 35, "bob@example.com", {"sports", "travel"}},
-        {"Carol White", 42, "carol@example.com", {"gardening", "cooking", "painting"}},
-        {"Dave Brown", 31, "dave@example.com", {}}};
+  std::vector<Person> people = {
+      {"Bob Smith", 35, "bob@example.com", {"sports", "travel"}},
+      {"Carol White",
+       42,
+       "carol@example.com",
+       {"gardening", "cooking", "painting"}},
+      {"Dave Brown", 31, "dave@example.com", {}}};
 
-    std::cout << meta::toCSVHeader<Person>() << "\n";
-    for (const auto& p : people)
-    {
-        std::cout << meta::toCSV(p) << "\n";
-    }
-    std::cout << "\n";
+  std::cout << meta::toCSVHeader<Person>() << "\n";
+  for (const auto &p : people) {
+    std::cout << meta::toCSV(p) << "\n";
+  }
+  std::cout << "\n";
 
-    // ========================================
-    // Example 3: Struct with Maps
-    // ========================================
-    std::cout << "--- Example 3: Struct with Maps ---\n";
+  // ========================================
+  // Example 3: Struct with Maps
+  // ========================================
+  std::cout << "--- Example 3: Struct with Maps ---\n";
 
-    Company company{"TechCorp",
-                    150,
-                    5000000.0,
-                    {{"Engineering", 60}, {"Sales", 50}, {"HR", 20}, {"Operations", 20}}};
+  Company company{
+      "TechCorp",
+      150,
+      5000000.0,
+      {{"Engineering", 60}, {"Sales", 50}, {"HR", 20}, {"Operations", 20}}};
 
-    std::cout << "Header: " << meta::toCSVHeader<Company>() << "\n";
-    std::cout << "Data:   " << meta::toCSV(company) << "\n\n";
+  std::cout << "Header: " << meta::toCSVHeader<Company>() << "\n";
+  std::cout << "Data:   " << meta::toCSV(company) << "\n\n";
 
-    // ========================================
-    // Example 4: Struct with Vectors and Optional
-    // ========================================
-    std::cout << "--- Example 4: Config with Optional ---\n";
+  // ========================================
+  // Example 4: Struct with Vectors and Optional
+  // ========================================
+  std::cout << "--- Example 4: Config with Optional ---\n";
 
-    Config cfg1{"WebApp", 30, true, {80, 443, 8080}, "Production server"};
-    Config cfg2{"Worker", 60, false, {9000}, std::nullopt};
+  Config cfg1{"WebApp", 30, true, {80, 443, 8080}, "Production server"};
+  Config cfg2{"Worker", 60, false, {9000}, std::nullopt};
 
-    std::cout << "Header: " << meta::toCSVHeader<Config>() << "\n";
-    std::cout << "Cfg 1:  " << meta::toCSV(cfg1) << "\n";
-    std::cout << "Cfg 2:  " << meta::toCSV(cfg2) << "\n\n";
+  std::cout << "Header: " << meta::toCSVHeader<Config>() << "\n";
+  std::cout << "Cfg 1:  " << meta::toCSV(cfg1) << "\n";
+  std::cout << "Cfg 2:  " << meta::toCSV(cfg2) << "\n\n";
 
-    // ========================================
-    // Example 5: Comparison - YAML vs CSV
-    // ========================================
-    std::cout << "--- Example 5: Same Data in Different Formats ---\n";
+  // ========================================
+  // Example 5: Comparison - YAML vs CSV
+  // ========================================
+  std::cout << "--- Example 5: Same Data in Different Formats ---\n";
 
-    Person p{"Eve Davis", 26, "eve@example.com", {"writing", "photography"}};
+  Person p{"Eve Davis", 26, "eve@example.com", {"writing", "photography"}};
 
-    std::cout << "YAML:\n" << meta::toYaml(p) << "\n";
-    std::cout << "JSON:\n" << meta::toJson(p) << "\n";
-    std::cout << "CSV:\n" << meta::toCSVHeader<Person>() << "\n" << meta::toCSV(p) << "\n\n";
+  std::cout << "YAML:\n" << meta::toYaml(p) << "\n";
+  std::cout << "JSON:\n" << meta::toJson(p) << "\n";
+  std::cout << "CSV:\n"
+            << meta::toCSVHeader<Person>() << "\n"
+            << meta::toCSV(p) << "\n\n";
 
-    // ========================================
-    // Example 6: Benefits of meta.h integration
-    // ========================================
-    std::cout << "--- Example 6: Meta.h Integration Benefits ---\n\n";
-
-    std::cout << "Works with all framework types:\n";
-    std::cout << "  - BoundedInt, BoundedString\n";
-    std::cout << "  - ContainersMap, ConstrainedMap, ConstrainedVector\n";
-    std::cout << "  - Pairs, Tuples, Optionals\n";
-    std::cout << "  - Nested structures\n\n";
-
-    std::cout << "Custom Ser/Deser works automatically:\n";
-    std::cout << "  - CSV respects any T::Ser implementation\n";
-    std::cout << "  - Validates according to custom types\n\n";
-
-    std::cout << "Same metadata for all formats:\n";
-    std::cout << "  - Field names, descriptions, annotations\n";
-    std::cout << "  - No duplication of schema\n\n";
-
-    std::cout << "Extensible without modifying core:\n";
-    std::cout << "  - Add new Builder types anytime\n";
-    std::cout << "  - All types automatically work\n\n";
-
-    return 0;
+  return 0;
 }

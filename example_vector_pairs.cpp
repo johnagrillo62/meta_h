@@ -8,56 +8,47 @@
 
 #include "meta.h"
 
-struct VectorOfPairs
-{
-    std::vector<std::pair<std::string, int>> items;
+using namespace meta;
+struct VectorOfPairs {
+  std::vector<std::pair<std::string, int>> items;
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&VectorOfPairs::items>("items", "Items"));
+  static constexpr auto fields = std::make_tuple(
+      field<&VectorOfPairs::items>("items", Description{"Items"}));
 };
 
-int main()
-{
-    std::cout << "TEST: Vector of Pairs Deserialization\n";
+int main() {
+  std::cout << "TEST: Vector of Pairs Deserialization\n";
 
-    std::string yaml_str = R"(
+  std::string yaml_str = R"(
 items:
   - [apple, 5]
   - [banana, 3]
 )";
 
-    YAML::Node node = YAML::Load(yaml_str);
-    auto [result, validation] = meta::reifyFromYaml<VectorOfPairs>(node);
+  YAML::Node node = YAML::Load(yaml_str);
+  auto [result, validation] = meta::reifyFromYaml<VectorOfPairs>(node);
 
-    if (validation.valid && result)
-    {
-        std::cout << "Deserialization succeeded\n";
-        std::cout << "   Size: " << result->items.size() << "\n";
-        for (size_t i = 0; i < result->items.size(); ++i)
-        {
-            std::cout << "   [" << i << "]: [" << result->items[i].first << ", "
-                      << result->items[i].second << "]\n";
-        }
-
-        if (result->items.size() == 2 && result->items[0].first == "apple" &&
-            result->items[0].second == 5 && result->items[1].first == "banana" &&
-            result->items[1].second == 3)
-        {
-            std::cout << "All values correct!\n";
-        }
-        else
-        {
-            std::cout << "Values wrong\n";
-        }
-    }
-    else
-    {
-        std::cout << "Deserialization failed\n";
-        for (const auto& [field, err] : validation.errors)
-        {
-            std::cout << "   " << field << ": " << err << "\n";
-        }
+  if (validation.valid && result) {
+    std::cout << "Deserialization succeeded\n";
+    std::cout << "   Size: " << result->items.size() << "\n";
+    for (size_t i = 0; i < result->items.size(); ++i) {
+      std::cout << "   [" << i << "]: [" << result->items[i].first << ", "
+                << result->items[i].second << "]\n";
     }
 
-    return 0;
+    if (result->items.size() == 2 && result->items[0].first == "apple" &&
+        result->items[0].second == 5 && result->items[1].first == "banana" &&
+        result->items[1].second == 3) {
+      std::cout << "All values correct!\n";
+    } else {
+      std::cout << "Values wrong\n";
+    }
+  } else {
+    std::cout << "Deserialization failed\n";
+    for (const auto &[field, err] : validation.errors) {
+      std::cout << "   " << field << ": " << err << "\n";
+    }
+  }
+
+  return 0;
 }

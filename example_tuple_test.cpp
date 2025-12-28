@@ -10,84 +10,85 @@
 
 #include "meta.h"
 
+using namespace meta;
 // ============================================================================
 // TEST: Tuples in Structs
 // ============================================================================
 
-struct Coordinate
-{
-    std::string name;
-    std::tuple<double, double, double> position; // x, y, z
+struct Coordinate {
+  std::string name;
+  std::tuple<double, double, double> position; // x, y, z
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Coordinate::name>("name", "Coordinate name"),
-                        meta::Field<&Coordinate::position>("position", "XYZ position"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Coordinate::name>("name", Description{"Coordinate name"}),
+      field<&Coordinate::position>("position",
+                                       Description{"XYZ position"}));
 };
 
-struct Building
-{
-    std::string address;
-    std::tuple<int, int> dimensions;                 // width, height
-    std::vector<std::tuple<std::string, int>> rooms; // name, floor
+struct Building {
+  std::string address;
+  std::tuple<int, int> dimensions;                 // width, height
+  std::vector<std::tuple<std::string, int>> rooms; // name, floor
 
-    static constexpr auto fields =
-        std::make_tuple(meta::Field<&Building::address>("address", "Building address"),
-                        meta::Field<&Building::dimensions>("dimensions", "Width and height"),
-                        meta::Field<&Building::rooms>("rooms", "Rooms with their floor numbers"));
+  static constexpr auto fields = std::make_tuple(
+      field<&Building::address>("address", Description{"Building address"}),
+      field<&Building::dimensions>("dimensions",
+                                       Description{"Width and height"}),
+      field<&Building::rooms>(
+          "rooms", Description{"Rooms with their floor numbers"}));
 };
 
-int main()
-{
-    std::cout << "============================================================\n";
-    std::cout << "TEST: Tuples in Structs\n";
-    std::cout << "============================================================\n\n";
+int main() {
+  std::cout << "============================================================\n";
+  std::cout << "TEST: Tuples in Structs\n";
+  std::cout
+      << "============================================================\n\n";
 
-    // ========== Test 1: Simple tuple in struct ==========
-    std::cout << "--- Test 1: Coordinate with tuple<double, double, double> ---\n";
-    Coordinate coord{"Point A", {10.5, 20.3, 15.7}};
+  // ========== Test 1: Simple tuple in struct ==========
+  std::cout
+      << "--- Test 1: Coordinate with tuple<double, double, double> ---\n";
+  Coordinate coord{"Point A", {10.5, 20.3, 15.7}};
 
-    std::cout << "Original (YAML):\n" << meta::toYaml(coord);
-    std::cout << "\nOriginal (JSON):\n" << meta::toJson(coord) << "\n\n";
+  std::cout << "Original (YAML):\n" << meta::toYaml(coord);
+  std::cout << "\nOriginal (JSON):\n" << meta::toJson(coord) << "\n\n";
 
-    // Deserialize coordinate
-    std::string coord_yaml = R"(
+  // Deserialize coordinate
+  std::string coord_yaml = R"(
 name: Point B
 position: [5.2, 10.1, 3.8]
 )";
 
-    YAML::Node coord_node = YAML::Load(coord_yaml);
-    auto [coord_deser, coord_result] = meta::reifyFromYaml<Coordinate>(coord_node);
+  YAML::Node coord_node = YAML::Load(coord_yaml);
+  auto [coord_deser, coord_result] =
+      meta::reifyFromYaml<Coordinate>(coord_node);
 
-    if (coord_result.valid && coord_deser)
-    {
-        std::cout << " Coordinate deserialization successful!\n";
-        std::cout << "  Name: " << coord_deser->name << "\n";
-        std::cout << "  Position: (" << std::get<0>(coord_deser->position) << ", "
-                  << std::get<1>(coord_deser->position) << ", "
-                  << std::get<2>(coord_deser->position) << ")\n\n";
+  if (coord_result.valid && coord_deser) {
+    std::cout << " Coordinate deserialization successful!\n";
+    std::cout << "  Name: " << coord_deser->name << "\n";
+    std::cout << "  Position: (" << std::get<0>(coord_deser->position) << ", "
+              << std::get<1>(coord_deser->position) << ", "
+              << std::get<2>(coord_deser->position) << ")\n\n";
+  } else {
+    std::cout << " Coordinate deserialization failed:\n";
+    for (const auto &[field, err] : coord_result.errors) {
+      std::cout << "  " << field << ": " << err << "\n";
     }
-    else
-    {
-        std::cout << " Coordinate deserialization failed:\n";
-        for (const auto& [field, err] : coord_result.errors)
-        {
-            std::cout << "  " << field << ": " << err << "\n";
-        }
-        std::cout << "\n";
-    }
+    std::cout << "\n";
+  }
 
-    // ========== Test 2: Multiple tuples in struct ==========
-    std::cout << "--- Test 2: Building with tuple<int, int> and "
-                 "vector<tuple<string, int>> ---\n";
-    Building building{"123 Main St",
-                      {100, 50},
-                      {{"lobby", 1}, {"office-a", 2}, {"office-b", 2}, {"penthouse", 3}}};
+  // ========== Test 2: Multiple tuples in struct ==========
+  std::cout << "--- Test 2: Building with tuple<int, int> and "
+               "vector<tuple<string, int>> ---\n";
+  Building building{
+      "123 Main St",
+      {100, 50},
+      {{"lobby", 1}, {"office-a", 2}, {"office-b", 2}, {"penthouse", 3}}};
 
-    std::cout << "Original (YAML):\n" << meta::toYaml(building);
-    std::cout << "\nOriginal (JSON):\n" << meta::toJson(building) << "\n\n";
+  std::cout << "Original (YAML):\n" << meta::toYaml(building);
+  std::cout << "\nOriginal (JSON):\n" << meta::toJson(building) << "\n\n";
 
-    // Deserialize building
-    std::string building_yaml = R"(
+  // Deserialize building
+  std::string building_yaml = R"(
 address: 456 Oak Ave
 dimensions: [200, 75]
 rooms:
@@ -98,35 +99,32 @@ rooms:
   - [master, 3]
 )";
 
-    YAML::Node building_node = YAML::Load(building_yaml);
-    auto [building_deser, building_result] = meta::reifyFromYaml<Building>(building_node);
+  YAML::Node building_node = YAML::Load(building_yaml);
+  auto [building_deser, building_result] =
+      meta::reifyFromYaml<Building>(building_node);
 
-    if (building_result.valid && building_deser)
-    {
-        std::cout << " Building deserialization successful!\n";
-        std::cout << "  Address: " << building_deser->address << "\n";
-        std::cout << "  Dimensions: " << std::get<0>(building_deser->dimensions) << ""
-                  << std::get<1>(building_deser->dimensions) << "\n";
-        std::cout << "  Rooms:\n";
-        for (size_t i = 0; i < building_deser->rooms.size(); ++i)
-        {
-            const auto& room = building_deser->rooms[i];
-            std::cout << "   [" << i << "] " << std::get<0>(room) << " (Floor " << std::get<1>(room)
-                      << ")\n";
-        }
+  if (building_result.valid && building_deser) {
+    std::cout << " Building deserialization successful!\n";
+    std::cout << "  Address: " << building_deser->address << "\n";
+    std::cout << "  Dimensions: " << std::get<0>(building_deser->dimensions)
+              << "" << std::get<1>(building_deser->dimensions) << "\n";
+    std::cout << "  Rooms:\n";
+    for (size_t i = 0; i < building_deser->rooms.size(); ++i) {
+      const auto &room = building_deser->rooms[i];
+      std::cout << "   [" << i << "] " << std::get<0>(room) << " (Floor "
+                << std::get<1>(room) << ")\n";
     }
-    else
-    {
-        std::cout << " Building deserialization failed:\n";
-        for (const auto& [field, err] : building_result.errors)
-        {
-            std::cout << "  " << field << ": " << err << "\n";
-        }
+  } else {
+    std::cout << " Building deserialization failed:\n";
+    for (const auto &[field, err] : building_result.errors) {
+      std::cout << "  " << field << ": " << err << "\n";
     }
+  }
 
-    std::cout << "\n============================================================\n";
-    std::cout << "Tuple tests completed!\n";
-    std::cout << "============================================================\n";
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "Tuple tests completed!\n";
+  std::cout << "============================================================\n";
 
-    return 0;
+  return 0;
 }

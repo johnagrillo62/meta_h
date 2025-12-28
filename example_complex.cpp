@@ -8,77 +8,80 @@
 #include <iostream>
 
 #include "meta.h"
+using namespace meta;
 
 // ============================================================================
 // EXAMPLE 1: Map of Map of Vectors
 // ============================================================================
 
-struct NetworkTopology
-{
-    // Map<region, Map<datacenter, Vector<port>>>
-    std::map<std::string, std::map<std::string, std::vector<int>>> regions;
-    std::string description;
+struct NetworkTopology {
+  // Map<region, Map<datacenter, Vector<port>>>
+  std::map<std::string, std::map<std::string, std::vector<int>>> regions;
+  std::string description;
 
-    static constexpr auto fields = std::make_tuple(
-        meta::Field<&NetworkTopology::regions>{"regions", "Region -> Datacenter -> Ports"},
-        meta::Field<&NetworkTopology::description>{"description", "Network description"});
+  static constexpr auto fields = std::make_tuple(
+      field<&NetworkTopology::regions>(
+          "regions", Description{"Region -> Datacenter -> Ports"}),
+      field<&NetworkTopology::description>(
+          "description", Description{"Network description"}));
 };
 
 // ============================================================================
 // EXAMPLE 2: Vector of Tuples (pair<string, string>)
 // ============================================================================
 
-struct ServiceRegistry
-{
-    // Vector<Pair<service_name, status>>
-    std::vector<std::pair<std::string, std::string>> services;
-    // Vector<Pair<host, ip_address>>
-    std::vector<std::pair<std::string, std::string>> hosts;
+struct ServiceRegistry {
+  // Vector<Pair<service_name, status>>
+  std::vector<std::pair<std::string, std::string>> services;
+  // Vector<Pair<host, ip_address>>
+  std::vector<std::pair<std::string, std::string>> hosts;
 
-    static constexpr auto fields = std::make_tuple(
-        meta::Field<&ServiceRegistry::services>{"services", "Service name and status pairs"},
-        meta::Field<&ServiceRegistry::hosts>{"hosts", "Host name and IP address pairs"});
+  static constexpr auto fields = std::make_tuple(
+      field<&ServiceRegistry::services>(
+          "services", Description{"Service name and status pairs"}),
+      field<&ServiceRegistry::hosts>(
+          "hosts", Description{"Host name and IP address pairs"}));
 };
 
 // ============================================================================
 // TEST 1: MAP OF MAP OF VECTORS
 // ============================================================================
 
-void testMapOfMapOfVectors()
-{
-    std::cout << "============================================================\n";
-    std::cout << "TEST 1: MAP OF MAP OF VECTORS\n";
-    std::cout << "============================================================\n\n";
+void testMapOfMapOfVectors() {
+  std::cout << "============================================================\n";
+  std::cout << "TEST 1: MAP OF MAP OF VECTORS\n";
+  std::cout
+      << "============================================================\n\n";
 
-    NetworkTopology topo{
-        {
-            {"north-america",
-             {
-                 {"us-west-1", {8080, 8081, 8082, 8083}},
-                 {"us-east-1", {9000, 9001, 9002}},
-             }},
-            {"europe",
-             {
-                 {"eu-west-1", {7000, 7001}},
-                 {"eu-central-1", {7100, 7101, 7102}},
-             }},
-            {"asia-pacific",
-             {
-                 {"ap-southeast-1", {6000}},
-                 {"ap-northeast-1", {6100, 6101}},
-             }},
-        },
-        "Production network with multi-region setup",
-    };
+  NetworkTopology topo{
+      {
+          {"north-america",
+           {
+               {"us-west-1", {8080, 8081, 8082, 8083}},
+               {"us-east-1", {9000, 9001, 9002}},
+           }},
+          {"europe",
+           {
+               {"eu-west-1", {7000, 7001}},
+               {"eu-central-1", {7100, 7101, 7102}},
+           }},
+          {"asia-pacific",
+           {
+               {"ap-southeast-1", {6000}},
+               {"ap-northeast-1", {6100, 6101}},
+           }},
+      },
+      "Production network with multi-region setup",
+  };
 
-    std::cout << "Original Data (YAML):\n";
-    std::cout << meta::toYaml(topo);
+  std::cout << "Original Data (YAML):\n";
+  std::cout << meta::toYaml(topo);
 
-    std::cout << "\nOriginal Data (JSON):\n";
-    std::cout << meta::toJson(topo) << "\n\n";
+  std::cout << "\nOriginal Data (JSON):\n";
+  std::cout << meta::toJson(topo) << "\n\n";
 
-    // Deserialize from YAML
-    std::string yaml_topo = R"(
+  // Deserialize from YAML
+  std::string yaml_topo = R"(
 regions:
   south-america:
     br-south-1:
@@ -94,69 +97,66 @@ regions:
 description: Expanded network topology
 )";
 
-    YAML::Node node = YAML::Load(yaml_topo);
-    auto [deserialized_topo, result_topo] = meta::reifyFromYaml<NetworkTopology>(node);
+  YAML::Node node = YAML::Load(yaml_topo);
+  auto [deserialized_topo, result_topo] =
+      meta::reifyFromYaml<NetworkTopology>(node);
 
-    if (result_topo.valid)
-    {
-        std::cout << "Deserialization successful!\n\n";
-        std::cout << "Deserialized structure:\n";
-        std::cout << "Description: " << deserialized_topo->description << "\n\n";
-        for (const auto& [region, datacenters] : deserialized_topo->regions)
-        {
-            std::cout << "Region: " << region << "\n";
-            for (const auto& [dc, ports] : datacenters)
-            {
-                std::cout << "  Datacenter: " << dc << "\n";
-                std::cout << "    Ports: ";
-                for (int p : ports)
-                    std::cout << p << " ";
-                std::cout << "\n";
-            }
-        }
+  if (result_topo.valid) {
+    std::cout << "Deserialization successful!\n\n";
+    std::cout << "Deserialized structure:\n";
+    std::cout << "Description: " << deserialized_topo->description << "\n\n";
+    for (const auto &[region, datacenters] : deserialized_topo->regions) {
+      std::cout << "Region: " << region << "\n";
+      for (const auto &[dc, ports] : datacenters) {
+        std::cout << "  Datacenter: " << dc << "\n";
+        std::cout << "    Ports: ";
+        for (int p : ports)
+          std::cout << p << " ";
+        std::cout << "\n";
+      }
     }
-    else
-    {
-        std::cout << "❌ Deserialization failed\n";
-    }
+  } else {
+    std::cout << "❌ Deserialization failed\n";
+  }
 }
 
 // ============================================================================
 // TEST 2: VECTOR OF PAIRS (TUPLES)
 // ============================================================================
 
-void testVectorOfPairs()
-{
-    std::cout << "\n============================================================\n";
-    std::cout << "TEST 2: VECTOR OF PAIRS (TUPLES)\n";
-    std::cout << "============================================================\n\n";
+void testVectorOfPairs() {
+  std::cout
+      << "\n============================================================\n";
+  std::cout << "TEST 2: VECTOR OF PAIRS (TUPLES)\n";
+  std::cout
+      << "============================================================\n\n";
 
-    ServiceRegistry registry{
-        {
-            {"api-gateway", "healthy"},
-            {"auth-service", "healthy"},
-            {"database-primary", "healthy"},
-            {"cache-cluster", "degraded"},
-            {"message-queue", "healthy"},
-            {"monitoring", "stopped"},
-        },
-        {
-            {"server-001", "192.168.1.10"},
-            {"server-002", "192.168.1.11"},
-            {"server-003", "192.168.1.12"},
-            {"backup-001", "192.168.2.10"},
-            {"backup-002", "192.168.2.11"},
-        },
-    };
+  ServiceRegistry registry{
+      {
+          {"api-gateway", "healthy"},
+          {"auth-service", "healthy"},
+          {"database-primary", "healthy"},
+          {"cache-cluster", "degraded"},
+          {"message-queue", "healthy"},
+          {"monitoring", "stopped"},
+      },
+      {
+          {"server-001", "192.168.1.10"},
+          {"server-002", "192.168.1.11"},
+          {"server-003", "192.168.1.12"},
+          {"backup-001", "192.168.2.10"},
+          {"backup-002", "192.168.2.11"},
+      },
+  };
 
-    std::cout << "Original Data (YAML):\n";
-    std::cout << meta::toYaml(registry);
+  std::cout << "Original Data (YAML):\n";
+  std::cout << meta::toYaml(registry);
 
-    std::cout << "\nOriginal Data (JSON):\n";
-    std::cout << meta::toJson(registry) << "\n\n";
+  std::cout << "\nOriginal Data (JSON):\n";
+  std::cout << meta::toJson(registry) << "\n\n";
 
-    // Deserialize from YAML
-    std::string yaml_registry = R"(
+  // Deserialize from YAML
+  std::string yaml_registry = R"(
 services:
   - [web-server, running]
   - [load-balancer, running]
@@ -171,51 +171,46 @@ hosts:
   - [staging-01, 10.1.1.5]
 )";
 
-    YAML::Node node = YAML::Load(yaml_registry);
-    auto [deserialized_reg, result_reg] = meta::reifyFromYaml<ServiceRegistry>(node);
+  YAML::Node node = YAML::Load(yaml_registry);
+  auto [deserialized_reg, result_reg] =
+      meta::reifyFromYaml<ServiceRegistry>(node);
 
-    if (result_reg.valid)
-    {
-        std::cout << "✅ Deserialization successful!\n";
-        std::cout << "Services count: " << deserialized_reg->services.size() << "\n";
+  if (result_reg.valid) {
+    std::cout << "✅ Deserialization successful!\n";
+    std::cout << "Services count: " << deserialized_reg->services.size()
+              << "\n";
 
-        if (!deserialized_reg->services.empty())
-        {
-            std::cout << "First service: first=[" << deserialized_reg->services[0].first
-                      << "] second=[" << deserialized_reg->services[0].second << "]\n";
-        }
+    if (!deserialized_reg->services.empty()) {
+      std::cout << "First service: first=["
+                << deserialized_reg->services[0].first << "] second=["
+                << deserialized_reg->services[0].second << "]\n";
     }
+  }
 
-    if (result_reg.valid)
-    {
-        std::cout << " Deserialization successful!\n\n";
+  if (result_reg.valid) {
+    std::cout << " Deserialization successful!\n\n";
 
-        std::cout << "Services:\n";
-        for (const auto& [name, status] : deserialized_reg->services)
-        {
-            std::cout << "  " << name << " -> " << status << "\n";
-        }
-        std::cout << "\nHosts:\n";
-        for (const auto& [hostname, ip] : deserialized_reg->hosts)
-        {
-            std::cout << "  " << hostname << " -> " << ip << "\n";
-        }
+    std::cout << "Services:\n";
+    for (const auto &[name, status] : deserialized_reg->services) {
+      std::cout << "  " << name << " -> " << status << "\n";
     }
-    else
-    {
-        std::cout << " Deserialization failed\n";
+    std::cout << "\nHosts:\n";
+    for (const auto &[hostname, ip] : deserialized_reg->hosts) {
+      std::cout << "  " << hostname << " -> " << ip << "\n";
     }
+  } else {
+    std::cout << " Deserialization failed\n";
+  }
 }
 
-int main()
-{
-    std::cout << "\n";
-    std::cout << "  Complex Container Examples - Map of Map, Vector of Tuples \n";
+int main() {
+  std::cout << "\n";
+  std::cout << "  Complex Container Examples - Map of Map, Vector of Tuples \n";
 
-    testMapOfMapOfVectors();
-    testVectorOfPairs();
+  testMapOfMapOfVectors();
+  testVectorOfPairs();
 
-    std::cout << " All tests completed!\n";
+  std::cout << " All tests completed!\n";
 
-    return 0;
+  return 0;
 }
