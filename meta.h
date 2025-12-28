@@ -1032,17 +1032,105 @@ template <> inline void to(const std::filesystem::path& obj, Builder* b)
 // PUBLIC API
 //============================================================
 
+
+template <typename T>
+std::pair<std::optional<T>, ValidationResult> reifyFromYaml(const YAML::Node& node)
+{
+    ValidationResult validation;
+    
+    if constexpr (HasFields<T>)
+    {
+        // Collect known field names and check which are required
+        std::set<std::string> known_fields;
+        std::set<std::string> required_fields;
+        std::set<std::string> yaml_fields;
+        
+        // Get all YAML keys
+        if (node.IsMap()) {
+            for (const auto& kv : node) {
+                std::string key = kv.first.as<std::string>();
+                yaml_fields.insert(key);
+            }
+        }
+        
+        
+        // Check each field in struct
+        std::apply([&](auto&&... fields) {
+            ([&](auto&& field) {
+                std::string field_name(field.fieldName);
+                known_fields.insert(field_name);
+                
+                // Check if field is required (not optional)
+                using FieldType = typename std::decay_t<decltype(field)>::MemberType;
+                if constexpr (!is_optional_v<FieldType>) {
+                    required_fields.insert(field_name);
+                }
+            }(fields), ...);
+        }, get_fields<T>());
+        
+        
+        // CHECK 1: Unknown fields in YAML (not in struct)
+        for (const auto& yaml_field : yaml_fields) {
+            if (known_fields.find(yaml_field) == known_fields.end()) {
+                validation.errors.push_back({
+                    yaml_field,
+                    "Unknown field - not in struct definition"
+                });
+            } else {
+            }
+        }
+        
+        // CHECK 2: Missing required fields (in struct but not in YAML)
+        for (const auto& req_field : required_fields) {
+            if (yaml_fields.find(req_field) == yaml_fields.end()) {
+                validation.errors.push_back({
+                    req_field,
+                    "Missing required field"
+                });
+            } else {
+            }
+        }
+        
+        // If pre-validation failed, return early
+	// if (!validation.errors.empty()) {
+        //    validation.valid = false;
+        //    return {std::nullopt, validation};
+        //}
+        
+    }
+    
+    // Now do the actual parsing
+    try
+    {
+        YamlNode ynode(node);
+        T obj{};
+        auto result = from(obj, &ynode);
+        
+        // Merge any parsing errors with our validation errors
+        validation.errors.insert(validation.errors.end(), 
+                                result.errors.begin(), 
+                                result.errors.end());
+        validation.valid = result.valid;
+        
+        return result.valid ? std::make_pair(std::optional(obj), validation)
+                            : std::make_pair(std::nullopt, validation);
+    }
+    catch (const std::exception& e)
+    {
+        validation.addError("yaml", std::string(e.what()));
+        validation.valid = false;
+        return {std::nullopt, validation};
+    }
+}
+
+
 template <typename T>
 std::pair<std::optional<T>, ValidationResult> reifyFromYaml(const std::string& yaml)
 {
     try
     {
         YAML::Node node = YAML::Load(yaml);
-        YamlNode ynode(node);
-        T obj{};
-        auto result = from(obj, &ynode);
-        return result.valid ? std::make_pair(std::optional(obj), result)
-                            : std::make_pair(std::nullopt, result);
+        return reifyFromYaml<T>(node);  // ← Call the version with validation!
     }
     catch (const std::exception& e)
     {
@@ -1052,24 +1140,6 @@ std::pair<std::optional<T>, ValidationResult> reifyFromYaml(const std::string& y
     }
 }
 
-template <typename T>
-std::pair<std::optional<T>, ValidationResult> reifyFromYaml(const YAML::Node& node)
-{
-    try
-    {
-        YamlNode ynode(node);
-        T obj{};
-        auto result = from(obj, &ynode);
-        return result.valid ? std::make_pair(std::optional(obj), result)
-                            : std::make_pair(std::nullopt, result);
-    }
-    catch (const std::exception& e)
-    {
-        ValidationResult result;
-        result.addError("yaml", std::string(e.what()));
-        return {std::nullopt, result};
-    }
-}
 
 template <typename T> std::string toYaml(const T& obj)
 {
@@ -1164,3 +1234,4 @@ std::vector<EnumT> enumValues()
 
   
 } // namespace meta
+
