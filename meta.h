@@ -26,6 +26,7 @@
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 #include <cstdint>
 #include <yaml-cpp/yaml.h>
@@ -733,6 +734,34 @@ ValidationResult from(std::optional<T>& obj, Node* node)
     return result;
 }
 
+// Variant
+template <typename... Types>
+ValidationResult from(std::variant<Types...>& obj, Node* node)
+{
+    ValidationResult result;
+    bool success = false;
+    
+    // Try each type in order until one succeeds
+    auto try_parse = [&]<typename T>() {
+        if (success) return;
+        
+        T value{};
+        auto parse_result = from(value, node);
+        if (parse_result.valid) {
+            obj = std::move(value);
+            success = true;
+        }
+    };
+    
+    (try_parse.template operator()<Types>(), ...);
+    
+    if (!success) {
+        result.addError("", "Could not parse as any variant type");
+    }
+    
+    return result;
+}
+
 // Pair
 template <typename K, typename V>
 ValidationResult from(std::pair<K, V>& obj, Node* node)
@@ -976,6 +1005,15 @@ void to(const std::optional<T>& obj, Builder* b)
         to(*obj, b);
     else
         b->writeNull();
+}
+
+// Variant
+template <typename... Types>
+void to(const std::variant<Types...>& obj, Builder* b)
+{
+    std::visit([b](const auto& value) {
+        to(value, b);
+    }, obj);
 }
 
 // Pair

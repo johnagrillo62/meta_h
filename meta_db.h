@@ -53,7 +53,7 @@ std::string createTable() {
     std::ostringstream sql;
     sql << "CREATE TABLE " << tableName << " (\n";
     
-    const auto& fields = meta::MetaTuple<T>::fields;
+    const auto& fields = meta::MetaTuple<T>::FieldsMeta;
     bool first = true;
     
     std::apply([&](auto&&... field_metas) {
@@ -82,7 +82,7 @@ std::string insertSQL(const T& obj) {
     std::ostringstream sql;
     sql << "INSERT INTO " << tableName << " (";
     
-    const auto& fields = meta::MetaTuple<T>::fields;
+    const auto& fields = meta::MetaTuple<T>::FieldsMeta;
     
     // Field names
     bool first = true;
@@ -132,7 +132,7 @@ std::string selectSQL() {
     std::ostringstream sql;
     sql << "SELECT ";
     
-    const auto& fields = meta::MetaTuple<T>::fields;
+    const auto& fields = meta::MetaTuple<T>::FieldsMeta;
     bool first = true;
     
     std::apply([&](auto&&... field_metas) {
@@ -159,7 +159,7 @@ std::string updateSQL(const T& obj) {
     std::ostringstream sql;
     sql << "UPDATE " << tableName << " SET ";
     
-    const auto& fields = meta::MetaTuple<T>::fields;
+    const auto& fields = meta::MetaTuple<T>::FieldsMeta;
     bool first = true;
     std::string pkValue;
     
