@@ -717,7 +717,7 @@ ValidationResult from(std::unordered_map<K, V>& obj, Node* node)
     return result;
 }
 
-// Optional
+
 template <typename T>
 ValidationResult from(std::optional<T>& obj, Node* node)
 {
@@ -734,7 +734,7 @@ ValidationResult from(std::optional<T>& obj, Node* node)
     return result;
 }
 
-// Variant
+
 template <typename... Types>
 ValidationResult from(std::variant<Types...>& obj, Node* node)
 {
