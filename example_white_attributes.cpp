@@ -27,7 +27,7 @@ struct Config {
     int port;
     float version;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&Config::environment>("environment", 
             Whitelist<allowed_envs>{}),  // String whitelist
         

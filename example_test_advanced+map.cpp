@@ -9,7 +9,7 @@ struct AdvancedMaps {
     std::map<int, std::vector<std::string>> groups;            // int -> vector
     std::map<std::string, std::map<int, std::string>> matrix;  // nested maps
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&AdvancedMaps::id_mapping>("id_mapping"),
         meta::field<&AdvancedMaps::groups>("groups"),
         meta::field<&AdvancedMaps::matrix>("matrix")

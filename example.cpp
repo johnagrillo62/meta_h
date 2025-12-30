@@ -7,6 +7,9 @@
 
 #include "meta.h"
 #include <iostream>
+#include <optional>
+#include <string>
+
 using namespace meta;
 
 // ============================================================================
@@ -60,7 +63,7 @@ struct DatabaseConfig {
   int port;
   bool ssl_enabled;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&DatabaseConfig::host>("host", Description{"Database host"}),
       field<&DatabaseConfig::port>("port", Description{"Database port"}),
       field<&DatabaseConfig::ssl_enabled>("ssl_enabled",
@@ -77,7 +80,7 @@ struct AppConfig {
   std::map<std::string, int> metrics;
   std::vector<Status> statuses;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&AppConfig::app_name>("app_name",
                                       Description{"Application name"}),
       field<&AppConfig::environment>("environment",
@@ -105,7 +108,7 @@ struct Data {
   std::map<std::string, int> scores;
   std::optional<std::string> note;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Data::numbers>("numbers", Description{"Numbers"}),
       field<&Data::scores>("scores", Description{"Scores"}),
       field<&Data::note>("note", Description{"Optional note"}));
@@ -219,7 +222,7 @@ statuses:
       std::cout << k << "=" << v << " ";
     std::cout << "\n";
   } else {
-    std::cout << "❌ Deserialization failed\n";
+    std::cout << "Deserialization failed\n";
   }
 
   // Test with invalid enum

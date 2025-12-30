@@ -15,7 +15,7 @@ struct User {
   std::string email;
   int score;
 
-  static constexpr auto fields = std::tuple(
+  static constexpr auto FieldsMeta = std::tuple(
       field<&User::username>("username", Description{"Username"}),
       field<&User::email>("email", Description{"Email address"}),
       field<&User::score>("score", Description{"User score"}));
@@ -46,7 +46,7 @@ int main() {
 
   auto [user2, result2] = meta::reifyFromYaml<User>(invalid);
   if (!user2) {
-    std::cout << "\nMissing fields:\n";
+    std::cout << "\nMissing FieldsMeta:\n";
     for (const auto &[field, msg] : result2.errors) {
       std::cout << "  " << field << ": " << msg << "\n";
     }

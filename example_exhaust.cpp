@@ -60,7 +60,7 @@ struct Primitives {
     double double_val;
     std::string text;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&Primitives::flag>("flag", Description{"Boolean"}),
         field<&Primitives::int_val>("int_val", Description{"int"}),
         field<&Primitives::double_val>("double_val", Description{"double"}),
@@ -78,7 +78,7 @@ struct Containers {
     std::set<std::string> set_data;
     std::deque<int> deque_data;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&Containers::vec_int>("vec_int", Description{"Vector of ints"}),
         field<&Containers::vec_string>("vec_string", Description{"Vector of strings"}),
         field<&Containers::map_string_int>("map_string_int", Description{"Map string->int"}),
@@ -97,7 +97,7 @@ struct TuplesAndPairs {
     std::vector<std::pair<std::string, int>> vec_pairs;
     std::vector<std::tuple<int, int, int>> vec_tuples;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&TuplesAndPairs::pair_data>("pair_data", Description{"Pair"}),
         field<&TuplesAndPairs::triple>("triple", Description{"3-tuple"}),
         field<&TuplesAndPairs::quad>("quad", Description{"4-tuple"}),
@@ -115,7 +115,7 @@ struct OptionalFields {
     std::optional<std::vector<std::string>> optional_tags;
     std::optional<std::map<std::string, int>> optional_metadata;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&OptionalFields::required_name>("required_name", Description{"Required"}),
         field<&OptionalFields::optional_nickname>("optional_nickname", Description{"Optional string"}),
         field<&OptionalFields::optional_age>("optional_age", Description{"Optional int"}),
@@ -133,7 +133,7 @@ struct EnumFields {
     std::map<std::string, Priority> task_priorities;
     std::optional<Color> secondary_color;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&EnumFields::primary_color>("primary_color", Description{"Primary color"}),
         field<&EnumFields::task_priority>("task_priority", Description{"Task priority"}),
         field<&EnumFields::color_palette>("color_palette", Description{"Color palette"}),
@@ -148,7 +148,7 @@ struct Address {
     std::string city;
     int zip;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&Address::street>("street", Description{"Street"}),
         field<&Address::city>("city", Description{"City"}),
         field<&Address::zip>("zip", Description{"ZIP code"})
@@ -161,7 +161,7 @@ struct Person {
     Address address;
     std::optional<Address> work_address;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&Person::name>("name", Description{"Name"}),
         field<&Person::age>("age", Description{"Age"}),
         field<&Person::address>("address", Description{"Home address"}),
@@ -175,7 +175,7 @@ struct NestedStructs {
     std::map<std::string, Address> locations;
     std::optional<Person> emergency_contact;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&NestedStructs::person>("person", Description{"Primary person"}),
         field<&NestedStructs::contacts>("contacts", Description{"Contact list"}),
         field<&NestedStructs::locations>("locations", Description{"Named locations"}),
@@ -191,7 +191,7 @@ struct ComplexContainers {
     std::vector<std::map<std::string, std::string>> vec_of_maps;
     std::map<std::string, std::tuple<int, std::string, bool>> map_to_tuple;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&ComplexContainers::matrix>("matrix", Description{"2D matrix"}),
         field<&ComplexContainers::map_to_vec>("map_to_vec", Description{"Map to vector"}),
         field<&ComplexContainers::map_to_map>("map_to_map", Description{"Map to map"}),
@@ -210,7 +210,7 @@ struct MegaStruct {
     NestedStructs nested_structs;
     ComplexContainers complex_containers;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         field<&MegaStruct::primitives>("primitives", Description{"All primitive types"}),
         field<&MegaStruct::containers>("containers", Description{"All container types"}),
         field<&MegaStruct::tuples_and_pairs>("tuples_and_pairs", Description{"Tuples and pairs"}),

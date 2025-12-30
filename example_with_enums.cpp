@@ -41,7 +41,7 @@ struct LogEntry {
   LogLevel level;
   int line_number;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&LogEntry::message>("message", Description{"Log message"}),
       field<&LogEntry::level>("level", Description{"Log level"}),
       field<&LogEntry::line_number>("line_number",

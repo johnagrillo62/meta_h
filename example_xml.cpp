@@ -227,7 +227,7 @@ struct Person {
   std::string email;
   std::vector<std::string> hobbies;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Person::name>("name", Description{"Person's name"}),
       field<&Person::age>("age", Description{"Person's age"}),
       field<&Person::email>("email", Description{"Email address"}),
@@ -240,7 +240,7 @@ struct Company {
   double revenue;
   std::map<std::string, int> departments;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Company::name>("name", Description{"Company name"}),
       field<&Company::employees>("employees",
                                      Description{"Number of employees"}),
@@ -256,7 +256,7 @@ struct Contact {
   std::optional<std::string> website;
   std::vector<std::string> tags;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Contact::name>("name", Description{"Contact name"}),
       field<&Contact::phone>("phone", Description{"Phone number"}),
       field<&Contact::address>("address", Description{"Street address"}),

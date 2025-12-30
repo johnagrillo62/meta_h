@@ -12,7 +12,7 @@ using namespace meta;
 struct VectorOfPairs {
   std::vector<std::pair<std::string, int>> items;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&VectorOfPairs::items>("items", Description{"Items"}));
 };
 

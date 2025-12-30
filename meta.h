@@ -57,29 +57,35 @@ struct MetaTuple;
 // FIELD LOCATION HELPER
 //============================================================
 
+
+
 // Helper to get fields from either T::fields or meta::MetaTuple<T>::fields
 template <typename T>
-concept HasDirectFields = requires { T::fields; };
+concept HasDirectFields = requires { T::FieldsMeta; };
 
 template <typename T>
-concept HasMetaTupleFields = requires { meta::MetaTuple<T>::fields; };
+concept HasMetaTupleFields = requires { meta::MetaTuple<T>::FieldsMeta; };
 
 template <typename T>
 concept HasFields = HasDirectFields<T> || HasMetaTupleFields<T>;
+
+// Concept for catching structs without metadata
+template <typename T>
+concept StructWithoutMetadata = !HasFields<T> && std::is_class_v<T> && !std::is_same_v<T, std::string>;
 
 template <typename T>
 constexpr decltype(auto) get_fields()
 {
     if constexpr (HasDirectFields<T>)
-        return (T::fields);
+        return (T::FieldsMeta);
     else if constexpr (HasMetaTupleFields<T>)
-        return (meta::MetaTuple<T>::fields);
+        return (meta::MetaTuple<T>::FieldsMeta);
     else
         static_assert(HasDirectFields<T> || HasMetaTupleFields<T>, 
-                     "Type must have either T::fields or meta::MetaTuple<T>::fields");
+                     "Type must have either T::FieldsMeta or meta::MetaTuple<T>::FieldsMeta");
 }
   
-  
+
 //============================================================
 // ENUM SUPPORT
 //============================================================
@@ -843,6 +849,15 @@ ValidationResult from(T& obj, Node* node)
     }
 }
 
+// Catch-all for structs without metadata - gives compile-time error instead of linker error
+template <StructWithoutMetadata T>
+ValidationResult from(T& obj, Node* node)
+{
+    static_assert(HasFields<T>,
+                  "ERROR: Type must have T::FieldsMeta or meta::MetaTuple<T>::FieldsMeta defined");
+    return ValidationResult{};
+}
+
 //============================================================
 // SERIALIZATION (to)
 //============================================================
@@ -1007,6 +1022,14 @@ void to(const T& obj, Builder* b)
             get_fields<T>());
         b->endMap();
     }
+}
+
+// Catch-all for structs without metadata - gives compile-time error instead of linker error
+template <StructWithoutMetadata T>
+void to(const T& obj, Builder* b)
+{
+    static_assert(HasFields<T>,
+                  "ERROR: Type must have T::FieldsMeta or meta::MetaTuple<T>::FieldsMeta defined");
 }
 
 // Filesystem path support

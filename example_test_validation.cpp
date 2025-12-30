@@ -7,7 +7,7 @@ struct User {
     std::string name;
     std::string email;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&User::id>("id"),
         meta::field<&User::name>("name"),
         meta::field<&User::email>("email")

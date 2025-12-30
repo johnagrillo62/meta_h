@@ -14,7 +14,7 @@ struct Address {
     std::string country;
     std::optional<int> zip_code;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&Address::street>("street"),
         meta::field<&Address::city>("city"),
         meta::field<&Address::state>("state"),
@@ -28,7 +28,7 @@ struct Company {
     std::optional<Address> headquarters;
     std::vector<Address> offices;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&Company::name>("name"),
         meta::field<&Company::headquarters>("headquarters"),
         meta::field<&Company::offices>("offices")
@@ -43,7 +43,7 @@ struct Employee {
     std::optional<Address> mailing_address;
     std::optional<Company> employer;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&Employee::id>("id"),
         meta::field<&Employee::name>("name"),
         meta::field<&Employee::middle_name>("middle_name"),

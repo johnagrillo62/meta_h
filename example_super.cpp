@@ -37,7 +37,7 @@ struct PortConfig {
   std::optional<std::string> protocol; // e.g., "TCP", "UDP"
   Status status;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&PortConfig::port>("port", Description{"Port number"}),
       field<&PortConfig::protocol>("protocol",
                                        Description{"Optional protocol"}),
@@ -53,7 +53,7 @@ struct Server {
   std::vector<PortConfig> ports;
   std::map<std::string, std::string> metadata; // arbitrary key-value pairs
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Server::hostname>("hostname", Description{"Server name"}),
       field<&Server::ports>("ports", Description{"Port configurations"}),
       field<&Server::metadata>("metadata",
@@ -70,7 +70,7 @@ struct DataCenter {
   std::map<std::string, std::tuple<int, int, Status>>
       networkRanges; // subnet: (start, end, status)
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&DataCenter::name>("name", Description{"Datacenter name"}),
       field<&DataCenter::servers>("servers",
                                       Description{"Servers in datacenter"}),
@@ -88,7 +88,7 @@ struct GlobalTopology {
       serviceEndpoints; // service -> host -> status
   std::optional<std::string> description;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&GlobalTopology::datacenters>(
           "datacenters", Description{"Map of region->datacenter"}),
       field<&GlobalTopology::serviceEndpoints>(

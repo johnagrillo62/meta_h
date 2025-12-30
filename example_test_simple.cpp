@@ -8,7 +8,7 @@ struct SimpleStruct {
     std::string name;
     int value;
     
-    inline static constexpr auto fields = std::make_tuple(
+    inline static constexpr auto FieldsMeta = std::make_tuple(
       field<&SimpleStruct::name>("name"),
       field<&SimpleStruct::value>("value")
     );
@@ -19,7 +19,7 @@ struct TestData {
     std::vector<SimpleStruct> vec_of_structs;
     std::vector<std::vector<int>> matrix;
     
-    inline static constexpr auto fields = std::make_tuple(
+    inline static constexpr auto FieldsMeta = std::make_tuple(
         field<&TestData::vec_of_maps>("vec_of_maps"),
         field<&TestData::vec_of_structs>("vec_of_structs"),
         field<&TestData::matrix>("matrix")

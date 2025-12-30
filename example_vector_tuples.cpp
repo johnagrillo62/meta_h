@@ -13,7 +13,7 @@ using namespace meta;
 struct VectorOfTuples {
   std::vector<std::tuple<std::string, int, bool>> records;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&VectorOfTuples::records>("records", Description{"Records"}));
 };
 

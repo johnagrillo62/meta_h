@@ -14,7 +14,7 @@ using namespace meta;
 struct SimplePair {
   std::pair<std::string, int> data;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&SimplePair::data>("data", Description{"A pair"}));
 };
 

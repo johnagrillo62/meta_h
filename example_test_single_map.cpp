@@ -6,7 +6,7 @@
 struct Data {
     std::map<int, std::string> codes;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&Data::codes>("codes")
     );
 };

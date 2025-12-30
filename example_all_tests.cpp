@@ -45,7 +45,7 @@ struct Person {
   std::string name;
   int age;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Person::name>("name", Description{"Person's name"}),
       field<&Person::age>("age", Description{"Person's age"}));
 };
@@ -53,7 +53,7 @@ struct Person {
 struct Team {
   std::map<std::string, Person> members;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Team::members>("members", Description{"Team members"}));
 };
 
@@ -98,7 +98,7 @@ void testMapOfStructs() {
 struct Region {
   std::map<std::string, std::vector<int>> data;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Region::data>("data", Description{"Regional data"}));
 };
 
@@ -135,7 +135,7 @@ void testMapOfVectors() {
 struct Records {
   std::vector<std::map<std::string, int>> items;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Records::items>("items", Description{"List of records"}));
 };
 
@@ -171,7 +171,7 @@ void testVectorOfMaps() {
 struct NestedMaps {
   std::map<std::string, std::map<std::string, int>> matrix;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&NestedMaps::matrix>("matrix", Description{"2D matrix"}));
 };
 
@@ -208,7 +208,7 @@ void testNestedMaps() {
 struct People {
   std::vector<Person> list;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&People::list>("list", Description{"List of people"}));
 };
 
@@ -245,7 +245,7 @@ struct Address {
   std::string city;
   std::string country;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Address::city>("city", Description{"City"}),
       field<&Address::country>("country", Description{"Country"}));
 };
@@ -255,7 +255,7 @@ struct Company {
   std::map<std::string, Address> offices;
   std::vector<std::map<std::string, int>> departments;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Company::name>("name", Description{"Company name"}),
       field<&Company::offices>("offices", Description{"Office locations"}),
       field<&Company::departments>("departments",
@@ -298,7 +298,7 @@ struct PairData {
   std::vector<std::pair<std::string, int>> items;
   std::map<std::string, std::pair<double, double>> coordinates;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&PairData::items>("items", Description{"Key-value pairs"}),
       field<&PairData::coordinates>("coordinates",
                                         Description{"2D coordinates"}));
@@ -350,7 +350,7 @@ struct TupleData {
   std::vector<std::tuple<std::string, int, bool>> records;
   std::map<std::string, std::tuple<int, int, int>> versions;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&TupleData::triple>("triple", Description{"3-element tuple"}),
       field<&TupleData::records>("records",
                                      Description{"Vector of 3-tuples"}),

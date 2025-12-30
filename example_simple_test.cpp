@@ -17,7 +17,7 @@ struct Person {
   bool active;
 
   // Define fields as tuple
-  static constexpr auto fields = std::tuple(
+  static constexpr auto FieldsMeta = std::tuple(
       field<&Person::name>("name", Description{"Person's name"}),
       field<&Person::age>("age", Description{"Person's age"}),
       field<&Person::active>("active", Description{"Is person active"}));

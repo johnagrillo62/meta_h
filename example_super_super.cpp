@@ -22,7 +22,7 @@ struct PortConfig {
   std::string protocol;
   std::string status;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&PortConfig::port>("port", Description{"Port number"}),
       field<&PortConfig::protocol>("protocol", Description{"TCP/UDP"}),
       field<&PortConfig::status>("status", Description{"Port status"}));
@@ -33,7 +33,7 @@ struct Server {
   std::vector<PortConfig> ports;
   std::map<std::string, std::string> metadata;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Server::hostname>("hostname", Description{"Server name"}),
       field<&Server::ports>("ports", Description{"Port configs"}),
       field<&Server::metadata>("metadata",
@@ -45,7 +45,7 @@ struct DataCenter {
   std::vector<Server> servers;
   std::map<std::string, std::tuple<int, int, std::string>> networkRanges;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&DataCenter::name>("name", Description{"DataCenter name"}),
       field<&DataCenter::servers>("servers", Description{"Servers"}),
       field<&DataCenter::networkRanges>("networkRanges",
@@ -57,7 +57,7 @@ struct MegaTopology {
   std::vector<std::pair<std::string, std::string>> serviceEndpoints;
   std::string description;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&MegaTopology::datacenters>("datacenters",
                                             Description{"All DCs"}),
       field<&MegaTopology::serviceEndpoints>("serviceEndpoints",

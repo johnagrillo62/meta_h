@@ -10,7 +10,7 @@ struct Address {
     std::string country;
     std::optional<int> zip_code;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&Address::street>("street"),
         meta::field<&Address::city>("city"),
         meta::field<&Address::state>("state"),
@@ -24,7 +24,7 @@ struct ContactInfo {
     std::optional<std::string> phone;
     std::optional<std::string> fax;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&ContactInfo::email>("email"),
         meta::field<&ContactInfo::phone>("phone"),
         meta::field<&ContactInfo::fax>("fax")
@@ -38,7 +38,7 @@ struct Company {
     std::vector<Address> offices;
     std::optional<ContactInfo> contact;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&Company::name>("name"),
         meta::field<&Company::employee_count>("employee_count"),
         meta::field<&Company::headquarters>("headquarters"),
@@ -58,7 +58,7 @@ struct Employee {
     std::optional<Company> employer;
     std::vector<std::string> skills;
     
-    static constexpr auto fields = std::make_tuple(
+    static constexpr auto FieldsMeta = std::make_tuple(
         meta::field<&Employee::id>("id"),
         meta::field<&Employee::name>("name"),
         meta::field<&Employee::middle_name>("middle_name"),

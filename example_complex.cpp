@@ -19,7 +19,7 @@ struct NetworkTopology {
   std::map<std::string, std::map<std::string, std::vector<int>>> regions;
   std::string description;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&NetworkTopology::regions>(
           "regions", Description{"Region -> Datacenter -> Ports"}),
       field<&NetworkTopology::description>(
@@ -36,7 +36,7 @@ struct ServiceRegistry {
   // Vector<Pair<host, ip_address>>
   std::vector<std::pair<std::string, std::string>> hosts;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&ServiceRegistry::services>(
           "services", Description{"Service name and status pairs"}),
       field<&ServiceRegistry::hosts>(

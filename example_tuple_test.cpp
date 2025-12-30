@@ -19,7 +19,7 @@ struct Coordinate {
   std::string name;
   std::tuple<double, double, double> position; // x, y, z
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Coordinate::name>("name", Description{"Coordinate name"}),
       field<&Coordinate::position>("position",
                                        Description{"XYZ position"}));
@@ -30,7 +30,7 @@ struct Building {
   std::tuple<int, int> dimensions;                 // width, height
   std::vector<std::tuple<std::string, int>> rooms; // name, floor
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Building::address>("address", Description{"Building address"}),
       field<&Building::dimensions>("dimensions",
                                        Description{"Width and height"}),

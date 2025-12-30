@@ -10,7 +10,7 @@ struct Config {
   std::filesystem::path dataDir;
   int port;
 
-  static constexpr auto fields = std::make_tuple(
+  static constexpr auto FieldsMeta = std::make_tuple(
       field<&Config::appName>("appName"),
       field<&Config::logPath>("logPath"),
       field<&Config::dataDir>("dataDir"), field<&Config::port>("port"));

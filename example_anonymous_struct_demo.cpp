@@ -30,14 +30,14 @@ namespace meta
 {
 namespace GPIO_Port
 {
-inline const auto fields = std::make_tuple(
+inline const auto FieldsMeta = std::make_tuple(
     meta::field<&::GPIO_Port::address>("address"),
     meta::field<&::GPIO_Port::mode>("mode"),
     meta::field<&::GPIO_Port::control>("control"));
 
 namespace mode
 {
-inline const auto fields = std::make_tuple(
+inline const auto FieldsMeta = std::make_tuple(
     meta::field<&decltype(::GPIO_Port::mode)::input>("input"),
     meta::field<&decltype(::GPIO_Port::mode)::output>("output"),
     meta::field<&decltype(::GPIO_Port::mode)::pullup>("pullup"),
@@ -46,13 +46,13 @@ inline const auto fields = std::make_tuple(
 } // namespace mode
 namespace control
 {
-inline const auto fields = std::make_tuple(
+inline const auto FieldsMeta = std::make_tuple(
     meta::field<&decltype(::GPIO_Port::control)::enable>("enable"),
     meta::field<&decltype(::GPIO_Port::control)::config>("config"));
 
 namespace config
 {
-inline const auto fields = std::make_tuple(
+inline const auto FieldsMeta = std::make_tuple(
     meta::field<&decltype(decltype(::GPIO_Port::control)::config)::speed>("speed"),
     meta::field<&decltype(decltype(::GPIO_Port::control)::config)::drive>("drive"),
     meta::field<&decltype(decltype(::GPIO_Port::control)::config)::reserved>("reserved"));
@@ -66,21 +66,21 @@ namespace meta
 {
 template <> struct MetaTuple<::GPIO_Port>
 {
-  static inline const auto& fields = meta::GPIO_Port::fields;
+  static inline const auto& FieldsMeta = meta::GPIO_Port::FieldsMeta;
   static constexpr auto tableName = "GPIO_Port";
   static constexpr auto query = "select address, mode, control from GPIO_Port";
 };
 template <> struct MetaTuple<decltype(::GPIO_Port::mode)>
 {
-  static inline const auto& fields = meta::GPIO_Port::mode::fields;
+  static inline const auto& FieldsMeta = meta::GPIO_Port::mode::FieldsMeta;
 };
 template <> struct MetaTuple<decltype(::GPIO_Port::control)>
 {
-  static inline const auto& fields = meta::GPIO_Port::control::fields;
+  static inline const auto& FieldsMeta = meta::GPIO_Port::control::FieldsMeta;
 };
 template <> struct MetaTuple<decltype(decltype(::GPIO_Port::control)::config)>
 {
-  static inline const auto& fields = meta::GPIO_Port::control::config::fields;
+  static inline const auto& FieldsMeta = meta::GPIO_Port::control::config::FieldsMeta;
 };
 } // namespace meta
 
